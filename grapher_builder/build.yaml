@@ -1,0 +1,8 @@
+builders:
+  grapher_builder:
+    import: "package:grapher_builder/builder.dart"
+    builder_factories: ["grapherBuilder"]
+    build_extensions: { ".dart": [".grapher.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen:combining_builder"]

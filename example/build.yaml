@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      grapher_builder:
+        options:
+          schemaFolder: "./schema" # Specify the schema folder path here

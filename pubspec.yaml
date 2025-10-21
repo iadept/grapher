@@ -1,0 +1,10 @@
+name: grapher_workspace
+publish_to: none
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+
+workspace:
+  - grapher_annotation
+  - grapher_builder
+  - example

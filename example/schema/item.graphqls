@@ -1,0 +1,44 @@
+extend type Query {
+    categories(input: SelectCategoryInput!): [Category!]!
+    items(input: SelectItemInput!): [Item!]!
+}
+
+extend type Mutation {
+    updateItem(input: UpdateItemInput!): Item! 
+}
+
+type Category {
+    id: ID!
+    name: String!
+}
+
+input SelectCategoryInput {
+    search: String
+}
+
+type Item {
+    id: ID!
+    createdAt: Timestamp!
+    name: String!
+    description: String
+    count: Int!
+    price: Double!
+    status: ItemStatus!
+}
+
+enum ItemStatus {
+    draft,
+    public,
+    promo
+}
+
+input SelectItemInput {
+    id: ID
+}
+
+input UpdateItemInput {
+    id: ID!
+    name: String
+    description: String
+    count: Int
+}

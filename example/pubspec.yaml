@@ -1,0 +1,19 @@
+name: example
+description: A sample command-line application.
+version: 1.0.0
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+
+# Add regular dependencies here.
+dependencies:
+  collection: any
+  grapher_annotation:
+
+dev_dependencies:
+  lints: ^6.0.0
+  grapher_builder:
+  build_runner: ^2.3.2
