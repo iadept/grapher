@@ -452,13 +452,10 @@ class EnumType extends BaseType {
     );
 
     if (annotation == null) {
-      final scope = Scope();
-      if (!scope.allowUnknownEnum) {
-        throw GrapherException(
-          'Enum ${element.displayName} must be annotated with @GrapherEnum',
-          path: object.location,
-        );
-      }
+      throw GrapherException(
+        'Enum ${element.displayName} must be annotated with @GrapherEnum',
+        path: object.location,
+      );
     }
     object.values.addAll(
       element.fields

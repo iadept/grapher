@@ -1,8 +1,10 @@
 name: grapher_builder
 description: Grapher code generation builder package.
-version: 0.1.1
+version: 0.1.2
 
 resolution: workspace
+
+repository: https://github.com/iadept/grapher/
 
 environment:
   sdk: ">=3.8.0 <4.0.0"

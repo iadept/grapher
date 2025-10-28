@@ -4,7 +4,7 @@ Grapher is helper for generate GraphQL from dart code!
 
 # Usage
 
-See example project
+See [example](https://github.com/iadept/grapher/tree/main/example) project
 
 Annotation have **name** param, which used for schema validation, if it does not exist validation skipped
 

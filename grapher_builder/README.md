@@ -4,9 +4,9 @@ Grapher is helper for generate GraphQL from dart code!
 
 # Usage
 
-See example project
+See [example](https://github.com/iadept/grapher/tree/main/example) project
 
-Also see doc in annotation project
+Also see [doc](https://github.com/iadept/grapher/tree/main/grapher_annotation) of annotation project
 
 Add dependencies:
 ```yaml
@@ -26,5 +26,3 @@ targets:
         options:
           schemaFolder: "./schema" # Path with graphqls files
 ```
-##
-

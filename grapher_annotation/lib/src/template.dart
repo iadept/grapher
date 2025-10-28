@@ -16,16 +16,21 @@ class Query<T> {
   final T Function(dynamic body) parserFn;
 
   /// Optional cache time-to-live duration
+  /// You can use it in GrapherCache
   final Duration? cacheTTL;
 
   DocumentNode get _node => gql.gql(body);
 
-  gql.QueryOptions<T> get result => gql.QueryOptions<T>(
+  gql.QueryOptions<T> result({
+    gql.FetchPolicy? fetchPolicy,
+    gql.Context? context,
+  }) => gql.QueryOptions<T>(
     document: _node,
     operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
     variables: variables ?? {},
     parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: gql.FetchPolicy.noCache,
+    fetchPolicy: fetchPolicy,
+    context: context,
   );
 
   Query({
@@ -53,12 +58,16 @@ class Mutation<T> {
 
   DocumentNode get _node => gql.gql(body);
 
-  gql.MutationOptions<T> get result => gql.MutationOptions<T>(
+  gql.MutationOptions<T> result({
+    gql.FetchPolicy? fetchPolicy,
+    gql.Context? context,
+  }) => gql.MutationOptions<T>(
     document: _node,
     operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
     variables: variables,
     parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: gql.FetchPolicy.noCache,
+    fetchPolicy: fetchPolicy,
+    context: context,
   );
 
   const Mutation({
@@ -82,10 +91,14 @@ class Subscription<T> {
 
   DocumentNode get _node => gql.gql(body);
 
-  gql.SubscriptionOptions<T> get result => gql.SubscriptionOptions<T>(
+  gql.SubscriptionOptions<T> result({
+    gql.FetchPolicy? fetchPolicy,
+    gql.Context? context,
+  }) => gql.SubscriptionOptions<T>(
     document: _node,
     parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: gql.FetchPolicy.noCache,
+    fetchPolicy: fetchPolicy,
+    context: context,
   );
 
   const Subscription({

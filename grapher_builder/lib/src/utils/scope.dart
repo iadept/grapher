@@ -8,17 +8,15 @@ class Scope {
   static Scope? _instance;
 
   final Schema? schema;
-  final bool allowUnknownEnum;
 
   final Map<String, BaseType> _objects = {};
 
-  Scope._({required this.schema, required this.allowUnknownEnum});
+  Scope._({required this.schema});
 
   factory Scope() => _instance!;
 
   factory Scope.make(BuilderOptions options) {
     final schemaFolder = options.config['schemaFolder'];
-    final allowUnnamedEnum = options.config['allowUnnamedEnum'] as bool?;
 
     Schema? schema;
 
@@ -26,10 +24,7 @@ class Scope {
       schema = Schema.parse(schemaFolder: schemaFolder);
     }
 
-    final instance = Scope._(
-      schema: schema,
-      allowUnknownEnum: allowUnnamedEnum ?? false,
-    );
+    final instance = Scope._(schema: schema);
 
     _instance = instance;
     return instance;

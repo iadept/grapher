@@ -37,7 +37,7 @@ class GrapherCache<T> {
   final Query query;
   final GrapherCacheStoreMixin store;
 
-  GrapherCache({required this.query, required this.store});
+  const GrapherCache({required this.query, required this.store});
 
   static GrapherCache<T>? from<T>(
     Query<T> query,
