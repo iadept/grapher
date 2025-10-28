@@ -1,6 +1,6 @@
 name: grapher_builder
-description: Grapher code generation builder package.
-version: 0.1.2
+description: GraphQL code generation based on dart code models. Supports all GraphQL types including queries, mutations, subscriptions, inputs, and enums.
+version: 0.1.3
 
 resolution: workspace
 
@@ -10,10 +10,9 @@ environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
-  analyzer: ^8.0.0
+  analyzer: ">=7.3.0 <9.0.0"
   collection: ^1.0.0
   gql: ^1.0.0
-  graphql: ^5.0.0
   grapher_annotation: ^0.1.0
   source_gen: ^4.0.0
   build: ^4.0.0

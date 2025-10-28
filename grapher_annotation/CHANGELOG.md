@@ -1,3 +1,7 @@
+## 0.1.3
+
+Add typename to query body
+
 ## 0.1.2
 
 Update docs

@@ -1,6 +1,6 @@
 builders:
   grapher_builder:
-    import: "package:grapher_builder/builder.dart"
+    import: "package:grapher_builder/grapher_builder.dart"
     builder_factories: ["grapherBuilder"]
     build_extensions: { ".dart": [".grapher.g.part"] }
     auto_apply: dependents

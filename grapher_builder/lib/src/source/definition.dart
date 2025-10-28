@@ -84,6 +84,7 @@ class Definition extends Part {
         return e.resolver.queryBody;
       case ClassEntityType e:
         final buffer = Buffer();
+        buffer.writeln('__typename');
         buffer.writeln(
           e.constructor.params.where((e) => !e.skipInQuery).map((e) {
             final buffer = Buffer();

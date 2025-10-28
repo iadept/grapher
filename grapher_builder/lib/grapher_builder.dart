@@ -150,6 +150,7 @@ class _QueryGenerator extends GeneratorForAnnotation<GrapherQuery> {
   }
 }
 
+/// The main builder function that initializes the scope and sets up the code generators.
 Builder grapherBuilder(BuilderOptions options) {
   Scope.make(options);
 
