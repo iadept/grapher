@@ -53,15 +53,13 @@ class Mutation<T> {
 
   DocumentNode get _node => gql.gql(body);
 
-  gql.MutationOptions<T> resultWithContext(gql.Context? context) =>
-      gql.MutationOptions<T>(
-        document: _node,
-        operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
-        variables: variables,
-        parserFn: (data) => parserFn(data[name]),
-        context: context,
-        fetchPolicy: gql.FetchPolicy.noCache,
-      );
+  gql.MutationOptions<T> get result => gql.MutationOptions<T>(
+    document: _node,
+    operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
+    variables: variables,
+    parserFn: (data) => parserFn(data[name]),
+    fetchPolicy: gql.FetchPolicy.noCache,
+  );
 
   const Mutation({
     required this.name,

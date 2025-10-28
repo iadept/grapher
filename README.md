@@ -10,3 +10,4 @@ It is planned in the next versions
 - Enhanced alias support
 - Enhanced validation with schema
 - Support fragment
+- Pass more option in generated queries

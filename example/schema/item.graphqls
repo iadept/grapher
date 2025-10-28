@@ -1,6 +1,8 @@
 extend type Query {
     categories(input: SelectCategoryInput!): [Category!]!
     items(input: SelectItemInput!): [Item!]!
+
+    brands(input: SelectBrandsInput!): [Brand!]!
 }
 
 extend type Mutation {
@@ -41,4 +43,18 @@ input UpdateItemInput {
     name: String
     description: String
     count: Int
+}
+
+type Brand {
+    id: ID!
+    name: String!
+    popular(input: SelectPopularityInRegionInput!): Boolean!
+}
+
+input SelectBrandsInput {
+    ids: [ID!]
+}
+
+input SelectPopularityInRegionInput {
+    countryCode: ID! 
 }

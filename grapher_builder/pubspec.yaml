@@ -1,6 +1,6 @@
 name: grapher_builder
 description: Grapher code generation builder package.
-version: 0.1.0
+version: 0.1.1
 
 resolution: workspace
 
@@ -12,7 +12,7 @@ dependencies:
   collection: ^1.0.0
   gql: ^1.0.0
   graphql: ^5.0.0
-  grapher_annotation: 0.1.0
+  grapher_annotation: ^0.1.0
   source_gen: ^4.0.0
   build: ^4.0.0
   flutter:

@@ -45,7 +45,22 @@ class SelectItemInput {
 
   const SelectItemInput({this.id});
 }
+```
 
+### Fields
+
+All fields maybe annotated for change behavior
+
+```dart
+@GrapherObject(name: 'Item')
+class Item {
+  @GrapherField(name: 'code')
+  final ID id;
+
+  const Item(
+    this.id,
+  );
+}
 ```
 
 ### Enum
@@ -62,12 +77,19 @@ enum Status {
 
 ## Actions
 
+The library uses wrappers that you must use **result** for further use
+
 Use in
 
-- static function
+- static function 
 ```dart
 @GrapherQuery(name: 'items')
 static Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+```
+- top level function
+```dart
+@GrapherQuery(name: 'items')
+Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
 ```
 - getter if use parent class
 ```dart
@@ -86,6 +108,9 @@ Mutation<Item> get mutation => _updateItemInputMutation(this);
 ### Resolvers
 
 For custom types use resolvers and create custom annotation
+
+Custom resolver maybe **const** class!
+
 ```dart
 @GrapherResolver(name: 'Timestamp')
 class TimestampResolver with GrapherResolverMixin<DateTime> {
@@ -100,10 +125,14 @@ class TimestampResolver with GrapherResolverMixin<DateTime> {
   }
 }
 
-const  timestampResolver = TimestampResolver();
+// To avoid import issues, define the resolver class or instance in the same file as the new annotations.
+const timestampResolver = TimestampResolver();
 
+// Example for GrapherObject
 class ProjectObject extends GrapherObject {
   const ProjectObject({super.name})
     : super(resolvers: const [timestampResolver]);
 }
+
+// And use @ProjectObject(name:)
 ```

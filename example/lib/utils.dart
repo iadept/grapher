@@ -13,6 +13,7 @@ class TimestampResolver with GrapherResolverMixin<DateTime> {
   }
 }
 
+/// Use const instance to avoid recreating the resolver multiple times.
 const timestampResolver = TimestampResolver();
 
 class ProjectObject extends GrapherObject {

@@ -41,12 +41,20 @@ class GrapherField {
   /// The name of the field in the GraphQL schema.
   /// By default, it is the same as the Dart field name.
   final String? name;
+
+  /// The name of the input argument for this field.
+  /// By default, it is 'input'.
   final String inputName;
+
+  /// The name of the input variable for this field.
   final String? input;
 
   /// A map of GraphQL type names to Dart types. This is used for union types
   /// and interfaces.
   final Map<String, Type>? union;
+
+  /// The value to use when the enum value is not recognized.
+  /// Currently in development.
   final Enum? unknownValue;
 
   /// If true, this field will be skipped in query generation.

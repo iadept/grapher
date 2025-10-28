@@ -47,3 +47,37 @@ class UpdateItemInput {
 
   const UpdateItemInput({required this.id});
 }
+
+@ProjectObject(name: 'Brand')
+class Brand {
+  final ID id;
+  final String name;
+
+  @GrapherField(input: 'inputPopularity')
+  final bool popular;
+
+  const Brand(this.id, this.name, this.popular);
+
+  @GrapherQuery(name: 'brands')
+  static Query<List<Brand>> query(
+    SelectBrandsInput input,
+    // Additional input for popularity filter
+    SelectPopularityInRegionInput popularityInput,
+  ) => _brandQuery(input, popularityInput);
+}
+
+@GrapherInput()
+class SelectBrandsInput {
+  final List<ID>? ids;
+
+  const SelectBrandsInput({this.ids});
+
+  factory SelectBrandsInput.byIds(List<ID> ids) => SelectBrandsInput(ids: ids);
+}
+
+@GrapherInput()
+class SelectPopularityInRegionInput {
+  final ID countryCode;
+
+  const SelectPopularityInRegionInput({required this.countryCode});
+}
