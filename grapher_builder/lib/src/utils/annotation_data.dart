@@ -90,7 +90,7 @@ class FieldAnnotation {
     Enum? unknownValue;
     final unknownParam = reader.peek('unknownValue');
     if (unknownParam != null) {
-      final value = unknownParam.objectValue.variable;
+      // TODO final value = unknownParam.objectValue.variable;
     }
 
     return FieldAnnotation(

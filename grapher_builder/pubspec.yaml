@@ -8,11 +8,11 @@ environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
-  analyzer: any
+  analyzer: ^8.0.0
   collection: ^1.0.0
   gql: ^1.0.0
   graphql: ^5.0.0
-  grapher_annotation: any
+  grapher_annotation: 0.1.0
   source_gen: ^4.0.0
   build: ^4.0.0
   flutter:

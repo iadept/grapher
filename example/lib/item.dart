@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:example/utils.dart';
 import 'package:grapher_annotation/grapher_annotation.dart';
 
