@@ -67,19 +67,6 @@ sealed class BaseType extends Part {
         }
         final element = value.element;
 
-        final customAnnotation = CustomAnnotation.read(element);
-        if (customAnnotation != null) {
-          return ClassCustomType(
-            resolvers: concat(parent?.resolvers, customAnnotation.resolvers),
-            library: element.libraryPath,
-            dartName: element.displayName,
-            graphName: customAnnotation.name,
-            queryBody: customAnnotation.queryBody,
-            fromMap: customAnnotation.fromMap,
-            toMap: customAnnotation.toMap,
-          );
-        }
-
         if (element is ClassElement) {
           final annotation =
               ObjectAnnotation.peek(element) ?? InputAnnotation.peek(element);
@@ -310,7 +297,7 @@ class ClassEntityType extends BaseType {
       final def = param.def;
       final type = def.type;
       if (type is EnumType) {
-        if (!def.isNullable) {
+        if (!def.isNullable && !type.isFinal) {
           throw ValidationError(
             'Field "$name" is enum value and maybe nullable',
             path: param.location,
@@ -432,6 +419,7 @@ class ClassEntityType extends BaseType {
 
 class EnumType extends BaseType {
   final bool isStrict;
+  final bool isFinal;
 
   final List<EnumValue> values = [];
 
@@ -440,6 +428,7 @@ class EnumType extends BaseType {
     required super.dartName,
     required super.graphName,
     required this.isStrict,
+    required this.isFinal,
   });
 
   factory EnumType.parse(EnumElement element) {
@@ -449,6 +438,7 @@ class EnumType extends BaseType {
       dartName: element.displayName,
       graphName: annotation?.name,
       isStrict: annotation?.isStrict ?? true,
+      isFinal: annotation?.isFinal ?? false,
     );
 
     if (annotation == null) {

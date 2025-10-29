@@ -205,13 +205,11 @@ class Definition extends Part {
       case GenericType e:
         return '$genericPrefix${e.dartName}($field)';
       case EnumType e:
-        if (e.graphName == null) {
-          if (isNullable) {
-            return '${type.dartName}.values.firstWhereOrNull((value) => value.name == $field)';
-          }
-          return '${type.dartName}.values.firstWhere((value) => value.name == $field)';
+        if (isNullable) {
+          return '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)';
+        } else {
+          return '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)!';
         }
-        return '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)';
       case ClassObjectType():
         throw UnimplementedError();
     }

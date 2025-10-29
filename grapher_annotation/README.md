@@ -2,6 +2,15 @@
 
 Grapher is helper for generate GraphQL from dart code!
 
+Support:
+- Type, Input, Enum
+- Query, Mutation, Subscription
+- Union, Subquery
+
+Not implemented, but plan:
+- Fragments generation
+- Multiple queries
+
 # Usage
 
 See [example](https://github.com/iadept/grapher/tree/main/example) project

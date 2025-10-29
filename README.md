@@ -4,7 +4,7 @@ Grapher is helper for generate GraphQL from dart code!
 
 ## Status
 
-Currently under development but already used in a large project
+Ready for use in production
 
 It is planned in the next versions
 - Enhanced alias support

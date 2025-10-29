@@ -11,10 +11,10 @@ Also see [doc](https://github.com/iadept/grapher/tree/main/grapher_annotation) o
 Add dependencies:
 ```yaml
 dependencies:
-    grapher_annotation: ^0.1.0
+    grapher_annotation: ^0.2.0
 
 dev_dependencies:
-    grapher_builder: ^0.1.0
+    grapher_builder: ^0.2.0
 ```
 
 Create or modify build.yaml (optional for validation with schema)

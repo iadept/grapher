@@ -8,13 +8,19 @@ import 'package:source_gen/source_gen.dart';
 class EnumAnnotation {
   final String? name;
   final bool isStrict;
+  final bool isFinal;
 
-  const EnumAnnotation({required this.name, required this.isStrict});
+  const EnumAnnotation._({
+    required this.name,
+    required this.isStrict,
+    required this.isFinal,
+  });
 
   factory EnumAnnotation.read(ConstantReader reader) {
-    return EnumAnnotation(
+    return EnumAnnotation._(
       name: reader.peek('name')?.stringValue,
       isStrict: reader.peek('isStrict')?.boolValue ?? true,
+      isFinal: reader.peek('isFinal')?.boolValue ?? false,
     );
   }
 
@@ -135,43 +141,6 @@ class InputAnnotation with BaseAnnotation {
         element,
         InputAnnotation.read,
       );
-}
-
-class CustomAnnotation with BaseAnnotation {
-  @override
-  final String? name;
-  final String? queryBody;
-  final String fromMap;
-  final String toMap;
-
-  @override
-  final List<ResolverAnnotation>? resolvers;
-
-  const CustomAnnotation._({
-    required this.name,
-    this.queryBody,
-    required this.fromMap,
-    required this.toMap,
-    required this.resolvers,
-  });
-
-  static CustomAnnotation? read(Element element) {
-    return _getAnnotation<GrapherCustom, CustomAnnotation>(element, (reader) {
-      String extract(ConstantReader reader) {
-        final type = reader.objectValue.type as FunctionType;
-        final function = type.formalParameters.first.enclosingElement;
-        return '${function!.enclosingElement!.name}.${function.name}';
-      }
-
-      return CustomAnnotation._(
-        name: reader.peek('name')?.stringValue,
-        queryBody: reader.peek('queryBody')?.stringValue,
-        fromMap: extract(reader.peek('fromMap')!),
-        toMap: extract(reader.peek('toMap')!),
-        resolvers: _getResolvers(reader),
-      );
-    });
-  }
 }
 
 class ResolverAnnotation {

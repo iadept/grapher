@@ -1,3 +1,7 @@
+## 0.2.0
+
+Add isFinal Enum param 
+
 ## 0.1.3
 
 Add typename to query body

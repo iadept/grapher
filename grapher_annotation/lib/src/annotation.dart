@@ -1,9 +1,7 @@
 import 'package:meta/meta_meta.dart';
 
-// Enum
-
 @Target({TargetKind.enumType})
-/// Used to annotate enums that will be used in GraphQL schema.
+/// Used to annotate enum
 class GrapherEnum {
   /// The name of the enum in the GraphQL schema.
   final String? name;
@@ -11,7 +9,11 @@ class GrapherEnum {
   /// If true, validate that all enum values are mapped.
   final bool isStrict;
 
-  const GrapherEnum({this.name, this.isStrict = true});
+  /// If true, the enum cannot be extended in the GraphQL schema and you can use
+  /// non optional field in models
+  final bool isFinal;
+
+  const GrapherEnum({this.name, this.isStrict = true, this.isFinal = false});
 }
 
 @Target({TargetKind.enumValue})
@@ -25,18 +27,33 @@ class GrapherEnumValue {
   const GrapherEnumValue({this.name});
 }
 
-// Entity
-
 @Target({TargetKind.classType})
+/// Used to annotate type
 class GrapherObject {
+  /// The name of the type in the GraphQL schema.
   final String? name;
+
+  /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
   const GrapherObject({this.name, this.resolvers});
 }
 
+@Target({TargetKind.classType})
+/// Used to annotate input type
+class GrapherInput {
+  /// The name of the input type in the GraphQL schema.
+  final String? name;
+
+  /// A list of resolver mixins to handle custom serialization/deserialization.
+  final List<GrapherResolverMixin>? resolvers;
+
+  const GrapherInput({this.name, this.resolvers});
+}
+
 /// Used to annotate fields in a class.
 @Target({TargetKind.field})
+/// Used to annotate field of type [GrapherObject] or input [GrapherInput]
 class GrapherField {
   /// The name of the field in the GraphQL schema.
   /// By default, it is the same as the Dart field name.
@@ -78,26 +95,22 @@ class GrapherField {
   });
 }
 
-// Input
-
-@Target({TargetKind.classType})
-class GrapherInput {
-  final String? name;
-  final List<GrapherResolverMixin>? resolvers;
-
-  const GrapherInput({this.name, this.resolvers});
-}
-
 @Target({TargetKind.method, TargetKind.getter, TargetKind.function})
+/// Used to annotate query
 class GrapherQuery {
+  /// The name of the query in the GraphQL schema.
   final String name;
+
+  /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
   const GrapherQuery({required this.name, this.resolvers});
 }
 
 @Target({TargetKind.getter, TargetKind.function})
+/// Used to annotate mutation
 class GrapherMutation {
+  /// The name of the mutation in the GraphQL schema.
   final String name;
   final List<GrapherResolverMixin>? resolvers;
 
@@ -105,18 +118,30 @@ class GrapherMutation {
 }
 
 @Target({TargetKind.getter})
+/// Used to annotate subscription
 class GrapherSubscription {
+  /// The name of the subscription in the GraphQL schema.
   final String name;
+
+  /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
   const GrapherSubscription({required this.name, this.resolvers});
 }
 
-// Resolver
-
 @Target({TargetKind.classType})
+/// Used to annotate resolver
+///
+/// Resolver can be used to define custom serialization/deserialization
+/// for a specific GraphQL type.
+///
+/// Resolver should extend [GrapherResolverMixin] to implement fromMap and toMap
+/// methods.
 class GrapherResolver {
+  /// GraphQL type name
   final String name;
+
+  /// Query body for custom resolver
   final String? queryBody;
 
   const GrapherResolver({required this.name, this.queryBody});
@@ -126,23 +151,4 @@ mixin GrapherResolverMixin<T extends Object> {
   T fromMap(dynamic json);
 
   dynamic toMap(T value);
-}
-
-// Custom
-
-@Target({TargetKind.classType})
-class GrapherCustom<T extends Object> {
-  final String? name;
-  final String? queryBody;
-  final T Function(dynamic json)? fromMap;
-  final dynamic Function(T value)? toMap;
-  final List<GrapherResolverMixin>? resolvers;
-
-  const GrapherCustom({
-    this.name,
-    this.queryBody,
-    required this.fromMap,
-    required this.toMap,
-    this.resolvers,
-  });
 }

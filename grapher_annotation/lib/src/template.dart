@@ -1,5 +1,4 @@
-import 'package:gql/ast.dart';
-import 'package:graphql/client.dart' as gql;
+import 'package:graphql/client.dart';
 
 /// GraphQL Query data class
 class Query<T> {
@@ -19,21 +18,17 @@ class Query<T> {
   /// You can use it in GrapherCache
   final Duration? cacheTTL;
 
-  DocumentNode get _node => gql.gql(body);
+  QueryOptions<T> result({FetchPolicy? fetchPolicy, Context? context}) =>
+      QueryOptions<T>(
+        document: gql(body),
+        operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
+        variables: variables ?? {},
+        parserFn: (data) => parserFn(data[name]),
+        fetchPolicy: fetchPolicy,
+        context: context,
+      );
 
-  gql.QueryOptions<T> result({
-    gql.FetchPolicy? fetchPolicy,
-    gql.Context? context,
-  }) => gql.QueryOptions<T>(
-    document: _node,
-    operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
-    variables: variables ?? {},
-    parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: fetchPolicy,
-    context: context,
-  );
-
-  Query({
+  const Query({
     required this.name,
     required this.variables,
     required this.body,
@@ -56,19 +51,15 @@ class Mutation<T> {
   /// The parser function to parse the mutation result
   final T Function(dynamic body) parserFn;
 
-  DocumentNode get _node => gql.gql(body);
-
-  gql.MutationOptions<T> result({
-    gql.FetchPolicy? fetchPolicy,
-    gql.Context? context,
-  }) => gql.MutationOptions<T>(
-    document: _node,
-    operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
-    variables: variables,
-    parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: fetchPolicy,
-    context: context,
-  );
+  MutationOptions<T> result({FetchPolicy? fetchPolicy, Context? context}) =>
+      MutationOptions<T>(
+        document: gql(body),
+        operationName: name.substring(0, 1).toUpperCase() + name.substring(1),
+        variables: variables,
+        parserFn: (data) => parserFn(data[name]),
+        fetchPolicy: fetchPolicy,
+        context: context,
+      );
 
   const Mutation({
     required this.name,
@@ -89,17 +80,13 @@ class Subscription<T> {
   /// The parser function to parse the subscription result
   final T Function(dynamic body) parserFn;
 
-  DocumentNode get _node => gql.gql(body);
-
-  gql.SubscriptionOptions<T> result({
-    gql.FetchPolicy? fetchPolicy,
-    gql.Context? context,
-  }) => gql.SubscriptionOptions<T>(
-    document: _node,
-    parserFn: (data) => parserFn(data[name]),
-    fetchPolicy: fetchPolicy,
-    context: context,
-  );
+  SubscriptionOptions<T> result({FetchPolicy? fetchPolicy, Context? context}) =>
+      SubscriptionOptions<T>(
+        document: gql(body),
+        parserFn: (data) => parserFn(data[name]),
+        fetchPolicy: fetchPolicy,
+        context: context,
+      );
 
   const Subscription({
     required this.name,
