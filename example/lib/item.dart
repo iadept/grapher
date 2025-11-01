@@ -38,14 +38,15 @@ class SelectItemInput {
   factory SelectItemInput.byId(ID id) => SelectItemInput(id: id);
 }
 
-@GrapherInput()
+@GrapherInput(name: 'UpdateItemInput')
 class UpdateItemInput {
   final ID id;
+  final String? status;
 
   @GrapherMutation(name: 'updateItem')
   Mutation<Item> get mutation => _updateItemInputMutation(this);
 
-  const UpdateItemInput({required this.id});
+  const UpdateItemInput({required this.id, this.status});
 }
 
 @ProjectObject(name: 'Brand')

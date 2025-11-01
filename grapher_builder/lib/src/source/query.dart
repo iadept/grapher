@@ -9,7 +9,7 @@ import 'package:grapher_builder/src/utils/annotation_data.dart';
 import 'package:grapher_builder/src/utils/buffer.dart';
 import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
-import 'package:grapher_builder/src/utils/scope.dart';
+import 'package:grapher_builder/src/utils/config.dart';
 
 class SourceQuery extends Part {
   @override
@@ -116,7 +116,7 @@ class SourceQuery extends Part {
   }
 
   void validate() {
-    final schema = Scope().schema;
+    final schema = Config().schema;
     if (schema == null) return;
 
     final query = schema.queries.firstWhereOrNull((e) => e.name == graphName);

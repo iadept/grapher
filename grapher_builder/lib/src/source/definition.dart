@@ -31,10 +31,7 @@ class Definition extends Part {
 
   String get graphNameFull {
     switch (type) {
-      case StringType():
-      case IntType():
-      case DoubleType():
-      case BoolType():
+      case SimpleType():
       case ClassEntityType():
       case ClassCustomType():
       case ClassWithResolverType():
@@ -72,10 +69,7 @@ class Definition extends Part {
   String? graphBody([GenericMapped? parentMapped]) {
     final mapped = _merge(parentMapped);
     switch (type) {
-      case StringType():
-      case IntType():
-      case DoubleType():
-      case BoolType():
+      case SimpleType():
       case EnumType():
         return null;
       case ClassCustomType e:
@@ -172,15 +166,8 @@ class Definition extends Part {
 
   String _generateFromMapField(String field) {
     switch (type) {
-      case StringType():
-        return '$field as String';
-
-      case IntType():
-        return '$field as int';
-      case DoubleType():
-        return 'double.parse($field.toString())';
-      case BoolType():
-        return '$field as bool';
+      case SimpleType e:
+        return e.generateFromMapField?.call(field) ?? '$field as ${e.dartName}';
       case ClassCustomType e:
         return '${e.fromMap}($field)';
       case ClassWithResolverType e:
@@ -217,12 +204,8 @@ class Definition extends Part {
 
   String generateToMapField(String field) {
     switch (type) {
-      case StringType():
-      case IntType():
-      case DoubleType():
-      case BoolType():
+      case SimpleType():
         return field;
-
       case ListType e:
         if (isNullable) {
           return "$field?.map((e) => ${e.item.generateToMapField('e')}).toList()";

@@ -4,18 +4,19 @@ import 'package:grapher_builder/src/source/type.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/schema.dart';
 
-class Scope {
-  static Scope? _instance;
+class Config {
+  static Config? _instance;
 
   final Schema? schema;
+  final bool allowEnumStringInput;
 
   final Map<String, BaseType> _objects = {};
 
-  Scope._({required this.schema});
+  Config._({required this.schema, required this.allowEnumStringInput});
 
-  factory Scope() => _instance!;
+  factory Config() => _instance!;
 
-  factory Scope.make(BuilderOptions options) {
+  factory Config.load(BuilderOptions options) {
     final schemaFolder = options.config['schemaFolder'];
 
     Schema? schema;
@@ -24,7 +25,11 @@ class Scope {
       schema = Schema.parse(schemaFolder: schemaFolder);
     }
 
-    final instance = Scope._(schema: schema);
+    final instance = Config._(
+      schema: schema,
+      allowEnumStringInput:
+          options.config['allowEnumValueAsStringInput'] != false,
+    );
 
     _instance = instance;
     return instance;

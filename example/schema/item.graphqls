@@ -43,6 +43,7 @@ input UpdateItemInput {
     name: String
     description: String
     count: Int
+    status: ItemStatus
 }
 
 type Brand {

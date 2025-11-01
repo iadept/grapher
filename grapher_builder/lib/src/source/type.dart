@@ -9,7 +9,7 @@ import 'package:grapher_builder/src/utils/const.dart';
 import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/schema.dart';
-import 'package:grapher_builder/src/utils/scope.dart';
+import 'package:grapher_builder/src/utils/config.dart';
 
 sealed class BaseType extends Part {
   final String? library;
@@ -38,17 +38,21 @@ sealed class BaseType extends Part {
     final alias = value.alias?.element;
     if (alias != null) {
       if (alias.isIDType) {
-        return StringType(dartName: 'ID', graphName: 'ID');
+        return SimpleType(dartName: 'ID', graphName: 'ID');
       }
     }
     if (value.isDartCoreString) {
-      return StringType(dartName: 'String', graphName: 'String');
+      return SimpleType(dartName: 'String', graphName: 'String');
     } else if (value.isDartCoreInt) {
-      return IntType();
+      return SimpleType(dartName: 'int', graphName: 'Int');
     } else if (value.isDartCoreDouble) {
-      return DoubleType();
+      return SimpleType(
+        dartName: 'double',
+        graphName: 'Float',
+        generateFromMapField: (field) => 'double.parse($field.toString())',
+      );
     } else if (value.isDartCoreBool) {
-      return BoolType();
+      return SimpleType(dartName: 'bool', graphName: 'Boolean');
     } else if (value is TypeParameterType) {
       return GenericType(
         library: value.element.libraryPath,
@@ -61,9 +65,9 @@ sealed class BaseType extends Part {
           item: Definition.parse(parent, value.typeArguments.first),
         );
       } else {
-        final t = Scope().get(value.element);
-        if (t != null) {
-          return t;
+        final cachedElement = Config().get(value.element);
+        if (cachedElement != null) {
+          return cachedElement;
         }
         final element = value.element;
 
@@ -102,24 +106,15 @@ sealed class BaseType extends Part {
   }
 }
 
-class StringType extends BaseType {
-  StringType({
+class SimpleType extends BaseType {
+  final String Function(String field)? generateFromMapField;
+
+  SimpleType({
     super.library,
     required super.dartName,
     required super.graphName,
+    this.generateFromMapField,
   });
-}
-
-class IntType extends BaseType {
-  IntType() : super(library: null, dartName: 'int', graphName: 'Int');
-}
-
-class DoubleType extends BaseType {
-  DoubleType() : super(library: null, dartName: 'double', graphName: 'Float');
-}
-
-class BoolType extends BaseType {
-  BoolType() : super(library: null, dartName: 'bool', graphName: 'Boolean');
 }
 
 class GenericType extends BaseType {
@@ -269,13 +264,13 @@ class ClassEntityType extends BaseType {
 
     entity.constructor = Constructor.parse(entity, constructor);
 
-    Scope().add(entity);
+    Config().add(entity);
 
     return entity;
   }
 
   void validate() {
-    final schema = Scope().schema;
+    final schema = Config().schema;
     if (schema == null) return;
     if (graphName == null) return;
     final name = graphName ?? dartName;
@@ -308,14 +303,14 @@ class ClassEntityType extends BaseType {
   }
 
   void validateInput() {
-    final schema = Scope().schema;
+    final schema = Config().schema;
     if (schema == null) return;
     if (graphName == null) return;
     final name = graphName ?? dartName;
     final object = schema.get(name);
     if (object == null) throw GrapherException.notFound(location, name);
     if (object is! SchemaInput) {
-      throw GrapherException('Expect ${object.name} object', path: location);
+      throw ValidationError('Expect ${object.name} object', path: location);
     }
     final params = constructor.params;
     // Check required
@@ -324,7 +319,7 @@ class ClassEntityType extends BaseType {
         .toSet();
     for (final field in object.fields.where((e) => e.isRequired)) {
       if (!paramNames.contains(field.name)) {
-        throw GrapherException(
+        throw ValidationError(
           'Required field "${field.name}" is not mapped',
           path: location,
         );
@@ -336,11 +331,37 @@ class ClassEntityType extends BaseType {
       final name = param.graphName ?? param.dartName;
       final schemaParam = object.fields.firstWhereOrNull((e) => e.name == name);
       if (schemaParam == null) {
-        throw GrapherException(
+        throw ValidationError(
           'Field "$name" is not found in ${object.name}',
           path: param.location,
         );
       }
+      if (param.def.isNullable && schemaParam.isRequired) {
+        throw ValidationError(
+          'Field "$name" is required in schema but nullable in model',
+          path: param.location,
+        );
+      }
+      validateType(param.def, schemaParam.definition, param.location);
+    }
+  }
+
+  void validateType(Definition def, SchemaDefinition schemaDef, String path) {
+    switch (schemaDef) {
+      case SchemaNameType e:
+        if (e.name != def.type.graphName) {
+          if (Config().allowEnumStringInput && def.type.dartName == 'String') {
+            final e = Config().schema?.get(schemaDef.name);
+            if (e is SchemaEnum) return;
+          }
+          throw ValidationError(
+            'Field type "${def.type.graphName}" does not match schema type "${e.name}"',
+            path: path,
+          );
+        }
+        break;
+      case SchemaListType e:
+        break;
     }
   }
 
@@ -453,12 +474,12 @@ class EnumType extends BaseType {
           .map((e) => EnumValue.parse(object, e)),
     );
 
-    Scope().add(object);
+    Config().add(object);
     return object;
   }
 
   void validate() {
-    final schema = Scope().schema;
+    final schema = Config().schema;
     if (schema == null) return;
     if (graphName == null) return;
     final object = schema.get(graphName!);

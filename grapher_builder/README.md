@@ -25,4 +25,5 @@ targets:
       grapher_builder:
         options:
           schemaFolder: "./schema" # Path with graphqls files
+          allowEnumValueAsStringInput: true # Allow replacing an enum value in input with a string
 ```

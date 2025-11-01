@@ -21,6 +21,8 @@ Annotation have **name** param, which used for schema validation, if it does not
 
 Define class with unnamed or _ constructor, all fields in this constructor used in code generation
 
+See below examples of dart model for graphql entity
+
 ### Object
 
 ```dart
@@ -31,7 +33,6 @@ class Item {
   final String name;
   final String? description;
   final int count;
-
   final ItemStatus? status;
 
   const Item(
@@ -45,6 +46,18 @@ class Item {
 }
 ```
 
+```graphql
+type Item {
+    id: ID!
+    createdAt: Timestamp!
+    name: String!
+    description: String
+    count: Int!
+    price: Double!
+    status: ItemStatus!
+}
+```
+
 ### Input
 
 ```dart
@@ -55,6 +68,14 @@ class SelectItemInput {
   const SelectItemInput({this.id});
 }
 ```
+
+```graphql
+input SelectItemInput {
+    id: ID
+}
+```
+
+For greater compatibility, you can replace enum values with a string.
 
 ### Fields
 
@@ -83,6 +104,12 @@ enum Status {
 }
 ```
 
+```graphql
+enum Status {
+    new,
+    closed
+}
+```
 
 ## Actions
 
@@ -90,20 +117,36 @@ The library uses wrappers that you must use **result** for further use
 
 Use in
 
-- static function 
+- static function in object or input
 ```dart
-@GrapherQuery(name: 'items')
-static Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+@GrapherObject()
+class Item {
+  // ...
+
+  @GrapherQuery(name: 'items')
+  static Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+}
+```
+
+```graphql
+extend type Query {
+    items(input: SelectItemInput!): [Item!]!
+}
 ```
 - top level function
 ```dart
 @GrapherQuery(name: 'items')
-Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+Query<List<Item>> query(SelectItemInput input) => _query(input);
 ```
-- getter if use parent class
+- getter in input
 ```dart
-@GrapherMutation(name: 'updateItem')
-Mutation<Item> get mutation => _updateItemInputMutation(this);
+@GrapherObject()
+class UpdateItemInput {
+  // ...
+
+  @GrapherMutation(name: 'updateItem')
+  Mutation<Item> get mutation => _updateItemInputMutation(this);
+}
 ```
 
 ### Query 

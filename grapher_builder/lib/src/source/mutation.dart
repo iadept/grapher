@@ -8,7 +8,7 @@ import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/source/type.dart';
 import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/source/definition.dart';
-import 'package:grapher_builder/src/utils/scope.dart';
+import 'package:grapher_builder/src/utils/config.dart';
 
 class SourceMutation extends Part {
   @override
@@ -115,7 +115,7 @@ class SourceMutation extends Part {
   }
 
   void validate() {
-    final schema = Scope().schema;
+    final schema = Config().schema;
     if (schema == null) return;
 
     final input = schema.mutations.firstWhereOrNull(

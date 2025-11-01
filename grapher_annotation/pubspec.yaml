@@ -1,6 +1,6 @@
 name: grapher_annotation
 description: Annotation package for 'grapher_builder' package. For generating GraphQL based on dart code models.
-version: 0.2.0
+version: 0.2.1
 resolution: workspace
 
 repository: https://github.com/iadept/grapher/

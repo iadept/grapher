@@ -7,7 +7,7 @@ import 'package:grapher_builder/src/source/subscription.dart';
 import 'package:grapher_builder/src/source/type.dart';
 import 'package:grapher_builder/src/utils/annotation_data.dart';
 import 'package:grapher_builder/src/utils/exception.dart';
-import 'package:grapher_builder/src/utils/scope.dart';
+import 'package:grapher_builder/src/utils/config.dart';
 import 'package:source_gen/source_gen.dart';
 
 class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
@@ -66,7 +66,7 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
         InputAnnotation.peek(element as ClassElement)!,
         element,
       );
-      source.validateInput;
+      source.validateInput();
 
       final query = SourceQuery.parseClass(
         source,
@@ -120,7 +120,6 @@ class _MutationGenerator extends GeneratorForAnnotation<GrapherMutation> {
     final source = SourceMutation.parseTopLevelFunction(
       element as TopLevelFunctionElement,
     );
-    // source.validate(scope.schema);
     final result = StringBuffer();
     result.writeln([source?.generate()].nonNulls.join('\n'));
     return result.toString();
@@ -152,7 +151,7 @@ class _QueryGenerator extends GeneratorForAnnotation<GrapherQuery> {
 
 /// The main builder function that initializes the scope and sets up the code generators.
 Builder grapherBuilder(BuilderOptions options) {
-  Scope.make(options);
+  Config.load(options);
 
   final generated = <String>{};
 

@@ -1,6 +1,6 @@
 name: grapher_builder
 description: GraphQL code generation based on dart code models. Supports all GraphQL types including queries, mutations, subscriptions, inputs, and enums.
-version: 0.2.0
+version: 0.2.1
 
 resolution: workspace
 
