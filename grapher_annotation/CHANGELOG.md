@@ -1,3 +1,7 @@
+## 0.2.1
+
+Update docs 
+
 ## 0.2.0
 
 Add isFinal Enum param 
