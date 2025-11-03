@@ -82,3 +82,48 @@ class SelectPopularityInRegionInput {
 
   const SelectPopularityInRegionInput({required this.countryCode});
 }
+
+// Union and Interface Example
+
+@ProjectObject(name: 'ItemDetails')
+class ItemDetails {
+  @GrapherField(
+    union: {
+      'WashingMachineDetails': WashingMachineDetails,
+      'RefrigeratorDetails': RefrigeratorDetails,
+      'OvenDetails': OvenDetails,
+    },
+  )
+  final Object? details;
+
+  const ItemDetails({this.details});
+}
+
+// union Details = WashingMachineDetails | RefrigeratorDetails | OvenDetails
+
+@ProjectObject(name: 'WashingMachineDetails')
+class WashingMachineDetails {
+  final int loadCapacity;
+  final int spinSpeed;
+
+  const WashingMachineDetails({
+    required this.loadCapacity,
+    required this.spinSpeed,
+  });
+}
+
+@ProjectObject(name: 'RefrigeratorDetails')
+class RefrigeratorDetails {
+  final int volume;
+  final bool hasFreezer;
+
+  const RefrigeratorDetails({required this.volume, required this.hasFreezer});
+}
+
+@ProjectObject(name: 'OvenDetails')
+class OvenDetails {
+  final int power;
+  final bool hasConvection;
+
+  const OvenDetails({required this.power, required this.hasConvection});
+}

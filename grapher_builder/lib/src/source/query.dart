@@ -11,7 +11,7 @@ import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 
-class SourceQuery extends Part {
+class SourceQuery extends Entity {
   @override
   final ClassEntityType? parent;
   final String dartName;
@@ -148,7 +148,6 @@ class SourceQuery extends Part {
       }
       param.validate(schemaParam);
     }
-    // TODO result.validate(query.returnType);
   }
 
   String generate() {

@@ -10,7 +10,7 @@ import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/source/definition.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 
-class SourceMutation extends Part {
+class SourceMutation extends Entity {
   @override
   final ClassEntityType? parent;
   final String dartName;

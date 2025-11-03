@@ -9,7 +9,7 @@ import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/schema.dart';
 
-class Constructor extends Part {
+class Constructor extends Entity {
   final String? dartName;
   final List<ConstructorParam> params = [];
 
@@ -45,7 +45,7 @@ class Constructor extends Part {
   }
 }
 
-abstract class _Parameter extends Part {
+abstract class _Parameter extends Entity {
   final String dartName;
   final String? graphName;
   late final Definition def;
@@ -148,7 +148,7 @@ class ConstructorParam extends _Parameter {
 
 class MethodParameter extends _Parameter {
   @override
-  final Part? parent;
+  final Entity? parent;
 
   @override
   String get identifier => dartName;
@@ -160,7 +160,10 @@ class MethodParameter extends _Parameter {
     required super.isNamed,
   }) : super(resolvers: parent?.resolvers);
 
-  factory MethodParameter.parse(Part? parent, FormalParameterElement element) {
+  factory MethodParameter.parse(
+    Entity? parent,
+    FormalParameterElement element,
+  ) {
     String? overrideName;
     if (element is FieldFormalParameterElement && element.field != null) {
       final annotation = FieldAnnotation.peek(element.field!);
@@ -179,7 +182,7 @@ class MethodParameter extends _Parameter {
     return object;
   }
 
-  factory MethodParameter.input(BaseType parent, Part? object) {
+  factory MethodParameter.input(BaseType parent, Entity? object) {
     final param = MethodParameter(
       parent: object,
       dartName: 'input',

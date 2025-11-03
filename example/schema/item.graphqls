@@ -59,3 +59,26 @@ input SelectBrandsInput {
 input SelectPopularityInRegionInput {
     countryCode: ID! 
 }
+
+# Union and Interface Example
+
+type ItemDetails {
+    details: Details
+}
+
+union Details = WashingMachineDetails | RefrigeratorDetails | OvenDetails
+
+type WashingMachineDetails {
+    loadCapacity: Int!
+    spinSpeed: Int!
+}
+
+type RefrigeratorDetails {
+    volume: Int!
+    hasFreezer: Boolean!
+}
+
+type OvenDetails {
+    power: Int!
+    hasConvection: Boolean!
+}

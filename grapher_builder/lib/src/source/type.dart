@@ -11,7 +11,7 @@ import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/schema.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 
-sealed class BaseType extends Part {
+sealed class BaseType extends Entity {
   final String? library;
   final String dartName;
   final String? graphName;
@@ -34,7 +34,7 @@ sealed class BaseType extends Part {
 
   String generateToMapValue(String field) => field;
 
-  factory BaseType.parse(Part? parent, DartType value) {
+  factory BaseType.parse(Entity? parent, DartType value) {
     final alias = value.alias?.element;
     if (alias != null) {
       if (alias.isIDType) {
@@ -153,7 +153,7 @@ class ListType extends BaseType {
   }
 }
 
-BaseType _custom(Part? parent, InterfaceType element) {
+BaseType _custom(Entity? parent, InterfaceType element) {
   final resolver = parent?.resolvers?.firstWhereOrNull((r) {
     if (r.aliasElement != null) {
       return r.aliasElement == element.alias?.element;
@@ -190,7 +190,7 @@ BaseType _custom(Part? parent, InterfaceType element) {
 
 class ClassObjectType extends BaseType {
   @override
-  final Part? parent;
+  final Entity? parent;
 
   const ClassObjectType({
     required super.library,
@@ -360,7 +360,8 @@ class ClassEntityType extends BaseType {
           );
         }
         break;
-      case SchemaListType e:
+      case SchemaListType _:
+        // TODO implement list type validation
         break;
     }
   }
@@ -547,7 +548,7 @@ class EnumType extends BaseType {
   }
 }
 
-class EnumValue extends Part {
+class EnumValue extends Entity {
   @override
   final EnumType parent;
 

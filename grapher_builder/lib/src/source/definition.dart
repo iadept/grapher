@@ -9,9 +9,9 @@ import 'package:grapher_builder/src/utils/extension.dart';
 
 typedef GenericMapped = Map<String, Definition>;
 
-class Definition extends Part {
+class Definition extends Entity {
   @override
-  final Part? parent;
+  final Entity? parent;
   final BaseType type;
   final bool isNullable;
   final List<Definition>? generics;
@@ -133,7 +133,7 @@ class Definition extends Part {
     this.generics,
   }) : super(resolvers: parent?.resolvers);
 
-  factory Definition.parse(Part? parent, DartType value) {
+  factory Definition.parse(Entity? parent, DartType value) {
     final type = BaseType.parse(parent, value);
     List<Definition>? generics;
     if (type.hasGenerics) {

@@ -7,7 +7,7 @@ import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/source/definition.dart';
 import 'package:grapher_builder/src/source/type.dart';
 
-class SubscriptionSource extends Part {
+class SubscriptionSource extends Entity {
   @override
   final ClassEntityType? parent;
   final String dartName;
