@@ -1,3 +1,7 @@
+## 0.2.2
+
+Add createToMap param to object
+
 ## 0.2.1
 
 Update docs 

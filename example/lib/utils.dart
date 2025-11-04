@@ -17,6 +17,6 @@ class TimestampResolver with GrapherResolverMixin<DateTime> {
 const timestampResolver = TimestampResolver();
 
 class ProjectObject extends GrapherObject {
-  const ProjectObject({super.name})
+  const ProjectObject({super.name, super.createToMap = false})
     : super(resolvers: const [timestampResolver]);
 }

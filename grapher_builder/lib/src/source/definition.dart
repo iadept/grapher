@@ -221,9 +221,9 @@ class Definition extends Entity {
         return '${e.resolver.dartCallName}.toMap($field)';
       case ClassEntityType():
         if (isNullable) {
-          return "$field == null ? null : ${[type.dartName, toVariablesPostfix].uncapitalized}($field!)";
+          return "$field == null ? null : ${[type.dartName, toMapPostfix].uncapitalized}($field!)";
         }
-        return "${[type.dartName, toVariablesPostfix].uncapitalized}($field)";
+        return "${[type.dartName, toMapPostfix].uncapitalized}($field)";
       case EnumType e:
         if (isNullable) {
           return "$field == null ? null : ${[e.dartName, toMapPostfix].uncapitalized}($field!)";

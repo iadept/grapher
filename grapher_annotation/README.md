@@ -1,15 +1,16 @@
 # Grapher
 
-Grapher is helper for generate GraphQL from dart code!
+Grapher is a helper for generating client-side GraphQL from models written in Dart!
 
-Support:
+Support all base features:
 - Type, Input, Enum
 - Query, Mutation, Subscription
-- Union, Subquery
+- Union
+- Subquery (query on field)
 
 Not implemented, but plan:
-- Fragments generation
-- Multiple queries
+- Fragments generation (for reduce query complexity)
+- Multiple queries in one
 
 # Usage
 
@@ -21,7 +22,7 @@ Annotation have **name** param, which used for schema validation, if it does not
 
 Define class with unnamed or _ constructor, all fields in this constructor used in code generation
 
-See below examples of dart model for graphql entity
+Below are examples of the Dart model for the GraphQL entity example.
 
 ### Object
 
@@ -33,7 +34,7 @@ class Item {
   final String name;
   final String? description;
   final int count;
-  final ItemStatus? status;
+  final ItemStatus? status; // Enumeration values ​​are optional to ensure greater compatibility.
 
   const Item(
     this.id,

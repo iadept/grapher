@@ -22,10 +22,9 @@ class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
     BuildStep buildStep,
   ) {
     try {
-      final source = ClassEntityType.parse(
-        ObjectAnnotation.peek(element as ClassElement)!,
-        element,
-      );
+      final annotation = ObjectAnnotation.peek(element as ClassElement)!;
+
+      final source = ClassEntityType.parse(annotation, element);
 
       final queries = SourceQuery.parseClass(source, element);
 
@@ -40,6 +39,7 @@ class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
           ...queries.map((e) => e.generate()),
           ...subscription.map((e) => e.generate()),
           source.generateFromMap(),
+          if (annotation.createToMap) source.generateToMap(),
         ].nonNulls.join('\n'),
       );
 

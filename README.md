@@ -1,6 +1,6 @@
 # Grapher
 
-Grapher is helper for generate GraphQL from dart code!
+Grapher is a helper for generating client-side GraphQL from models written in Dart!
 
 ## Status
 

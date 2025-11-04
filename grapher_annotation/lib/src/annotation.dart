@@ -33,10 +33,13 @@ class GrapherObject {
   /// The name of the type in the GraphQL schema.
   final String? name;
 
+  // Generate toMap method
+  final bool createToMap;
+
   /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
-  const GrapherObject({this.name, this.resolvers});
+  const GrapherObject({this.name, this.createToMap = false, this.resolvers});
 }
 
 @Target({TargetKind.classType})

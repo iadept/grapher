@@ -54,14 +54,20 @@ mixin BaseAnnotation {
 class ObjectAnnotation with BaseAnnotation {
   @override
   final String? name;
+  final bool createToMap;
   @override
   final List<ResolverAnnotation>? resolvers;
 
-  const ObjectAnnotation({required this.name, this.resolvers});
+  const ObjectAnnotation._({
+    required this.name,
+    required this.createToMap,
+    this.resolvers,
+  });
 
   factory ObjectAnnotation.read(ConstantReader reader) {
-    return ObjectAnnotation(
+    return ObjectAnnotation._(
       name: reader.peek('name')?.stringValue,
+      createToMap: reader.peek('createToMap')?.boolValue ?? false,
       resolvers: _getResolvers(reader),
     );
   }

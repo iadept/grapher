@@ -347,6 +347,7 @@ class ClassEntityType extends BaseType {
   }
 
   void validateType(Definition def, SchemaDefinition schemaDef, String path) {
+    if (def.type.graphName == null) return;
     switch (schemaDef) {
       case SchemaNameType e:
         if (e.name != def.type.graphName) {
@@ -368,13 +369,15 @@ class ClassEntityType extends BaseType {
 
   @override
   String generateToMapValue(String field) {
-    final name = [dartName, toVariablesPostfix].uncapitalized;
+    final name = [dartName, toMapPostfix].uncapitalized;
     return '$name($field)';
   }
 
   String generateToMap() {
     final result = StringBuffer();
-    result.write("Map ${[dartName, toVariablesPostfix].uncapitalized}(");
+    result.write(
+      "Map<String, dynamic> ${[dartName, toMapPostfix].uncapitalized}(",
+    );
     result.writeln('$dartName object,');
     result.writeln(') {');
     result.writeln('final result = <String, dynamic>{};');

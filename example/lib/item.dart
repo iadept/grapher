@@ -3,7 +3,7 @@ import 'package:grapher_annotation/grapher_annotation.dart';
 
 part 'item.g.dart';
 
-@ProjectObject(name: 'Item')
+@ProjectObject(name: 'Item', createToMap: true)
 class Item {
   final ID id;
   final DateTime createdAt;
@@ -24,6 +24,12 @@ class Item {
 
   @GrapherQuery(name: 'items')
   static Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+
+  // You can use generated methods as JsonSerializable like
+  factory Item.fromJson(dynamic json) => itemFromMap(json);
+
+  // Created by createToMap param
+  Map<String, dynamic> toJson() => itemToMap(this);
 }
 
 @GrapherEnum(name: 'ItemStatus')
