@@ -1,3 +1,7 @@
+## 0.2.3
+
+Improve validation
+
 ## 0.2.2
 
 Add createToMap param to object

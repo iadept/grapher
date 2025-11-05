@@ -37,7 +37,6 @@ extension ElementExtension on Element {
   String get libraryPath => '${library?.identifier}.$name';
 
   bool get isIDType => libraryPath == '$_annotationPath.ID';
-  bool get isJSONType => libraryPath == '$_annotationPath.JSON';
 }
 
 extension VariableElementExtension on VariableElement {

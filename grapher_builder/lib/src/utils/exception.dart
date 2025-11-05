@@ -23,6 +23,10 @@ class ValidationError extends GrapherException {
   String toString() => [path, message].nonNulls.join(': ');
 }
 
+void throwValidationError(String message, String path) {
+  print([path, message].nonNulls.join(': '));
+}
+
 void onBuildError(Object e, StackTrace s, [Element? element]) {
   print(e);
 }

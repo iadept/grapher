@@ -136,7 +136,7 @@ class Definition extends Entity {
   factory Definition.parse(Entity? parent, DartType value) {
     final type = BaseType.parse(parent, value);
     List<Definition>? generics;
-    if (type.hasGenerics) {
+    if (type is GenericTypeMixin) {
       generics = value is InterfaceType
           ? value.typeArguments.map((e) => Definition.parse(parent, e)).toList()
           : null;

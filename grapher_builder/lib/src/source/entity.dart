@@ -21,3 +21,5 @@ abstract class Entity {
     }
   }
 }
+
+mixin GenericTypeMixin {}

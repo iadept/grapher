@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:collection/collection.dart';
 import 'package:grapher_builder/src/source/definition.dart';
 import 'package:grapher_builder/src/source/entity.dart';
 import 'package:grapher_builder/src/source/type.dart';
@@ -26,6 +27,22 @@ class Constructor extends Entity {
     required this.parent,
     required this.dartName,
   });
+
+  static Constructor parseDefaultConstructor(
+    ClassEntityType entity,
+    ClassElement element,
+  ) {
+    final constructors = element.constructors
+        .where((e) => e.isFactory == false)
+        .toList();
+    final constructor =
+        constructors.firstWhereOrNull((e) => e.name == 'new') ??
+        constructors.firstWhereOrNull((e) => e.name == '_');
+    if (constructor == null) {
+      throw Exception('${element.displayName} may be have unnamed constructor');
+    }
+    return Constructor.parse(entity, constructor);
+  }
 
   factory Constructor.parse(
     ClassEntityType parent,

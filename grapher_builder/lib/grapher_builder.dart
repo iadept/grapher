@@ -62,11 +62,11 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
     BuildStep buildStep,
   ) {
     try {
-      final source = ClassEntityType.parse(
+      final source = ClassInputEntityType.parse(
         InputAnnotation.peek(element as ClassElement)!,
         element,
       );
-      source.validateInput();
+      source.validate();
 
       final query = SourceQuery.parseClass(
         source,
@@ -137,9 +137,6 @@ class _QueryGenerator extends GeneratorForAnnotation<GrapherQuery> {
       final source = SourceQuery.parseTopLevelFunction(
         element as TopLevelFunctionElement,
       );
-
-      //  source?.validate();
-
       final result = StringBuffer();
       result.writeln([source?.generate()].nonNulls.join('\n'));
       return result.toString();
