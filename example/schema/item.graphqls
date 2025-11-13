@@ -26,6 +26,7 @@ type Item {
     count: Int!
     price: Double!
     status: ItemStatus!
+    sale: Boolean
 }
 
 enum ItemStatus {
@@ -60,7 +61,7 @@ input SelectPopularityInRegionInput {
     countryCode: ID! 
 }
 
-# Union and Interface Example
+# Union example
 
 type ItemDetails {
     details: Details

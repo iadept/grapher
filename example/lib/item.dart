@@ -3,37 +3,51 @@ import 'package:grapher_annotation/grapher_annotation.dart';
 
 part 'item.g.dart';
 
-@ProjectObject(name: 'Item', createToMap: true)
-class Item {
+@ProjectObject(name: 'Item')
+class ItemHeader {
   final ID id;
-  final DateTime createdAt;
   final String name;
+
+  const ItemHeader(this.id, this.name);
+
+  @GrapherQuery(name: 'items')
+  static Query<List<ItemHeader>> query(SelectItemInput input) =>
+      _itemHeaderQuery(input);
+}
+
+@ProjectObject(createToMap: true)
+class ItemView extends ItemHeader {
+  final DateTime createdAt;
+
   final String? description;
   final int count;
+  final bool? sale;
 
   final ItemStatus? status;
 
-  const Item(
-    this.id,
+  const ItemView(
+    super.id,
     this.createdAt,
-    this.name,
+    super.name,
     this.description,
     this.count,
     this.status,
+    this.sale,
   );
 
   @GrapherQuery(name: 'items')
-  static Query<List<Item>> query(SelectItemInput input) => _itemQuery(input);
+  static Query<List<ItemView>> query(SelectItemInput input) =>
+      _itemViewQuery(input);
 
   // You can use generated methods as JsonSerializable like
-  factory Item.fromJson(dynamic json) => itemFromMap(json);
+  factory ItemView.fromJson(dynamic json) => itemViewFromMap(json);
 
   // Created by createToMap param
-  Map<String, dynamic> toJson() => itemToMap(this);
+  Map<String, dynamic> toJson() => itemViewToMap(this);
 }
 
 @GrapherEnum(name: 'ItemStatus')
-enum ItemStatus { draft, public }
+enum ItemStatus { draft, public, promo }
 
 @GrapherInput()
 class SelectItemInput {
@@ -50,7 +64,7 @@ class UpdateItemInput {
   final String? status;
 
   @GrapherMutation(name: 'updateItem')
-  Mutation<Item> get mutation => _updateItemInputMutation(this);
+  Mutation<ItemView> get mutation => _updateItemInputMutation(this);
 
   const UpdateItemInput({required this.id, this.status});
 }

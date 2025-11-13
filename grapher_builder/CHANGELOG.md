@@ -1,3 +1,7 @@
+## 0.2.4
+
+Improve validation
+
 ## 0.2.3
 
 Improve validation

@@ -238,11 +238,26 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
     BaseAnnotation annotation,
     ClassElement element,
   ) {
+    String? graphName = annotation.name;
+
+    if (graphName == null) {
+      for (final supertype in element.allSupertypes) {
+        final superElement = supertype.element;
+        final superAnnotation = ObjectAnnotation.peek(superElement);
+        if (superAnnotation != null && superAnnotation.name != null) {
+          if (superAnnotation.name != null) {
+            graphName = superAnnotation.name;
+            break;
+          }
+        }
+      }
+    }
+
     final entity = ClassEntityType(
       resolvers: annotation.resolvers,
       library: element.libraryPath,
       dartName: element.displayName,
-      graphName: annotation.name,
+      graphName: graphName,
       generic: element.typeParameters.map(Generic.parse).toList(),
     );
 
@@ -261,28 +276,38 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
     final object = schema.get(name);
     if (object == null) throw GrapherException.notFound(location, name);
     if (object is! SchemaObject) {
-      throw GrapherException('Expect ${object.name} object', path: location);
+      throwValidationError('Expect ${object.name} object', location);
+      return;
     }
 
-    for (final param in constructor.params) {
+    final params = constructor.params;
+
+    for (final param in params) {
       final name = param.graphName ?? param.dartName;
       final schemaParam = object.fields.firstWhereOrNull((e) => e.name == name);
       if (schemaParam == null) {
-        throw GrapherException(
+        throwValidationError(
           'Field "$name" is not found in ${object.name}',
-          path: param.location,
+          param.location,
         );
+        return;
       }
       final def = param.def;
       final type = def.type;
-      if (type is EnumType) {
-        if (!def.isNullable && !type.isFinal) {
-          throw ValidationError(
-            'Field "$name" is enum value and maybe nullable',
-            path: param.location,
-          );
+      final schemaDef = schemaParam.definition;
+      if (def.isNullable == schemaDef.isNonNull) {
+        if (type is EnumType) {
+          if (def.isNullable != type.isFinal) {
+            continue;
+          }
         }
+        throwValidationError(
+          'Field "$name" wrong nullability type',
+          param.location,
+        );
       }
+
+      // validateType(param.def, schemaParam.definition, param.location);
     }
   }
 

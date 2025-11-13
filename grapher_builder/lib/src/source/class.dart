@@ -182,11 +182,6 @@ class MethodParameter extends _Parameter {
     FormalParameterElement element,
   ) {
     String? overrideName;
-    if (element is FieldFormalParameterElement && element.field != null) {
-      final annotation = FieldAnnotation.peek(element.field!);
-
-      overrideName = annotation?.name;
-    }
     final object = MethodParameter(
       parent: parent,
       dartName: element.displayName,
