@@ -21,8 +21,9 @@ class ItemView extends ItemHeader {
 
   final String? description;
   final int count;
+  @GrapherField(defaultValue: false)
   final bool? sale;
-
+  @GrapherField(defaultValue: ItemStatus.draft)
   final ItemStatus? status;
 
   const ItemView(

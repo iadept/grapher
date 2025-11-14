@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
@@ -87,6 +88,7 @@ class ConstructorParam extends _Parameter {
   final Map<String, DartType>? union;
   final String inputName;
   final String? input;
+  final DartObject? defaultValue;
 
   final bool skipInQuery;
 
@@ -102,6 +104,7 @@ class ConstructorParam extends _Parameter {
     required this.union,
     required this.inputName,
     required this.input,
+    required this.defaultValue,
     required this.skipInQuery,
   }) : super();
 
@@ -130,10 +133,27 @@ class ConstructorParam extends _Parameter {
       union: annotation?.union,
       inputName: annotation?.inputName ?? 'input',
       input: annotation?.input,
+      defaultValue: annotation?.defaultValue,
       skipInQuery: annotation?.skipInQuery ?? false,
     );
 
     object.def = Definition.parse(object, element.type);
+
+    if (!object.def.isNullable && annotation?.defaultValue != null) {
+      throw GrapherException(
+        'Non-nullable field ${element.displayName} cannot have defaultValue ',
+        path: object.location,
+      );
+    }
+
+    if (annotation?.defaultValue != null &&
+        annotation?.defaultValue?.type?.element != element.type.element) {
+      throw GrapherException(
+        'defaultValue type mismatch for ${element.displayName}',
+        path: object.location,
+      );
+    }
+
     return object;
   }
 
@@ -149,7 +169,10 @@ class ConstructorParam extends _Parameter {
         value = '$value!';
       }
     } else {
-      value = def.generateFromMapField(name);
+      value = def.generateFromMapField(
+        name,
+        defaultValue: _dartObjectToString(defaultValue),
+      );
     }
     if (isNamed) {
       value = '$dartName: $value';
@@ -222,5 +245,26 @@ class Generic {
 
   factory Generic.parse(TypeParameterElement element) {
     return Generic(name: element.displayName);
+  }
+}
+
+String? _dartObjectToString(DartObject? object) {
+  if (object == null) {
+    return null;
+  }
+  if (object.type?.isDartCoreString == true) {
+    return "'${object.toStringValue()}'";
+  } else if (object.type?.isDartCoreBool == true) {
+    return object.toBoolValue().toString();
+  } else if (object.type?.isDartCoreInt == true) {
+    return object.toIntValue().toString();
+  } else if (object.type?.isDartCoreDouble == true) {
+    return object.toDoubleValue().toString();
+  } else {
+    final variable = object.variable;
+    if (variable?.isEnumValue == true) {
+      return '${variable!.type.element!.name}.${variable.name}';
+    }
+    throw GrapherException('Unsupported defaultValue type: ${object.type}');
   }
 }

@@ -157,11 +157,15 @@ class Definition extends Entity {
     return type.generateToMapValue(field);
   }
 
-  String generateFromMapField(String field) {
+  String generateFromMapField(String field, {String? defaultValue}) {
+    String expr = _generateFromMapField(field);
     if (isNullable) {
-      return '$field == null ? null : ${_generateFromMapField(field)}';
+      expr = '$field == null ? null : $expr';
+      if (defaultValue != null) {
+        return '($expr) ?? $defaultValue';
+      }
     }
-    return _generateFromMapField(field);
+    return expr;
   }
 
   String _generateFromMapField(String field) {
@@ -192,10 +196,12 @@ class Definition extends Entity {
       case GenericType e:
         return '$genericPrefix${e.dartName}($field)';
       case EnumType e:
+        final expr =
+            '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)';
         if (isNullable) {
-          return '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)';
+          return expr;
         } else {
-          return '${[e.dartName, fromMapPostfix].uncapitalized}($field as String)!';
+          return '$expr!';
         }
       case ClassObjectType():
         throw UnimplementedError();

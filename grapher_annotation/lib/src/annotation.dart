@@ -73,9 +73,9 @@ class GrapherField {
   /// and interfaces.
   final Map<String, Type>? union;
 
-  /// The value to use when the enum value is not recognized.
-  /// Currently in development.
-  final Enum? unknownValue;
+  /// The default value for this field.
+  /// Supported types are: String, int, double, bool, enum values
+  final Object? defaultValue;
 
   /// If true, this field will be skipped in query generation.
   /// Used for custom resolve fields
@@ -93,7 +93,7 @@ class GrapherField {
     this.inputName = 'input',
     this.input,
     this.union,
-    this.unknownValue,
+    this.defaultValue,
     this.skipInQuery = false,
   });
 }

@@ -295,11 +295,14 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
       final def = param.def;
       final type = def.type;
       final schemaDef = schemaParam.definition;
-      if (def.isNullable == schemaDef.isNonNull) {
+      if (def.isNullable != schemaDef.isNullable) {
         if (type is EnumType) {
           if (def.isNullable != type.isFinal) {
             continue;
           }
+        }
+        if (schemaDef.isNullable && param.defaultValue != null) {
+          continue;
         }
         throwValidationError(
           'Field "$name" wrong nullability type',

@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
@@ -84,7 +85,8 @@ class FieldAnnotation {
   final String inputName;
   final String? input;
   final Map<String, DartType>? union;
-  final Enum? unknownValue;
+
+  final DartObject? defaultValue;
   final bool skipInQuery;
 
   const FieldAnnotation({
@@ -92,17 +94,17 @@ class FieldAnnotation {
     required this.inputName,
     this.input,
     this.union,
-    this.unknownValue,
+    this.defaultValue,
     this.skipInQuery = false,
   });
 
   factory FieldAnnotation.read(ConstantReader reader) {
     final unionParam = reader.peek('union');
 
-    Enum? unknownValue;
-    final unknownParam = reader.peek('unknownValue');
-    if (unknownParam != null) {
-      // TODO final value = unknownParam.objectValue.variable;
+    DartObject? defaultValue;
+    final defaultValueParam = reader.peek('defaultValue');
+    if (defaultValueParam != null) {
+      defaultValue = defaultValueParam.objectValue;
     }
 
     return FieldAnnotation(
@@ -115,7 +117,7 @@ class FieldAnnotation {
           value!.toTypeValue()!,
         );
       }),
-      unknownValue: unknownValue,
+      defaultValue: defaultValue,
       skipInQuery: reader.peek('skipInQuery')?.boolValue ?? false,
     );
   }

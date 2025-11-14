@@ -54,6 +54,8 @@ sealed class SchemaDefinition {
   final Schema schema;
   final bool isNonNull;
 
+  bool get isNullable => !isNonNull;
+
   const SchemaDefinition({required this.schema, required this.isNonNull});
 
   factory SchemaDefinition._parse(Schema schema, TypeNode node) {
