@@ -10,7 +10,7 @@ import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/source/definition.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 
-class SourceMutation extends Entity {
+class MutationSource extends Entity {
   @override
   final ClassEntityType? parent;
   final String dartName;
@@ -21,24 +21,24 @@ class SourceMutation extends Entity {
   @override
   String get identifier => dartName;
 
-  SourceMutation({
+  MutationSource({
     required super.resolvers,
     required this.parent,
     required this.dartName,
     required this.graphName,
   });
 
-  static List<SourceMutation> parseClass(
+  static List<MutationSource> parseClass(
     ClassEntityType parent,
     ClassElement element,
   ) {
     return [
-      ...element.getters.map((e) => SourceMutation.parseGetter(parent, e)),
-      ...element.methods.map((e) => SourceMutation.parse(parent, e)),
+      ...element.getters.map((e) => MutationSource.parseGetter(parent, e)),
+      ...element.methods.map((e) => MutationSource.parse(parent, e)),
     ].nonNulls.toList();
   }
 
-  static SourceMutation? parse(ClassEntityType parent, MethodElement element) {
+  static MutationSource? parse(ClassEntityType parent, MethodElement element) {
     final fullName =
         '${element.enclosingElement?.displayName}.${element.displayName}';
     final annotation = MutationAnnotation.peek(element);
@@ -50,7 +50,7 @@ class SourceMutation extends Entity {
     }
     final result = element.returnType;
     if (result is InterfaceType) {
-      final object = SourceMutation(
+      final object = MutationSource(
         resolvers: concat(parent.resolvers, annotation.resolvers),
         parent: parent,
         dartName: element.displayName,
@@ -67,7 +67,7 @@ class SourceMutation extends Entity {
     throw Exception('$fullName may return Query<T>');
   }
 
-  static SourceMutation? parseGetter(
+  static MutationSource? parseGetter(
     ClassEntityType parent,
     GetterElement element,
   ) {
@@ -77,7 +77,7 @@ class SourceMutation extends Entity {
     }
     final result = element.returnType as InterfaceType;
 
-    final object = SourceMutation(
+    final object = MutationSource(
       resolvers: concat(parent.resolvers, annotation.resolvers),
       parent: parent,
       dartName: element.displayName,
@@ -90,7 +90,7 @@ class SourceMutation extends Entity {
     return object;
   }
 
-  static SourceMutation? parseTopLevelFunction(
+  static MutationSource? parseTopLevelFunction(
     TopLevelFunctionElement element,
   ) {
     final annotation = MutationAnnotation.peek(element);
@@ -99,7 +99,7 @@ class SourceMutation extends Entity {
     }
     final result = element.returnType as InterfaceType;
 
-    final object = SourceMutation(
+    final object = MutationSource(
       parent: null,
       resolvers: annotation.resolvers,
       dartName: element.displayName,

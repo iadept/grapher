@@ -26,7 +26,7 @@ class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
 
       final source = ClassEntityType.parse(annotation, element);
 
-      final queries = SourceQuery.parseClass(source, element);
+      final queries = QuerySource.parseClass(source, element);
 
       final subscription = SubscriptionSource.parseClass(source, element);
 
@@ -68,11 +68,11 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
       );
       source.validate();
 
-      final query = SourceQuery.parseClass(
+      final query = QuerySource.parseClass(
         source,
         element,
       ).where((e) => !generated.contains(e.location));
-      final mutations = SourceMutation.parseClass(source, element);
+      final mutations = MutationSource.parseClass(source, element);
 
       final result = StringBuffer();
       result.writeln(
@@ -117,7 +117,7 @@ class _MutationGenerator extends GeneratorForAnnotation<GrapherMutation> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    final source = SourceMutation.parseTopLevelFunction(
+    final source = MutationSource.parseTopLevelFunction(
       element as TopLevelFunctionElement,
     );
     final result = StringBuffer();
@@ -134,7 +134,7 @@ class _QueryGenerator extends GeneratorForAnnotation<GrapherQuery> {
     BuildStep buildStep,
   ) {
     try {
-      final source = SourceQuery.parseTopLevelFunction(
+      final source = QuerySource.parseTopLevelFunction(
         element as TopLevelFunctionElement,
       );
       final result = StringBuffer();

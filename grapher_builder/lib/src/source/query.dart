@@ -11,7 +11,7 @@ import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 
-class SourceQuery extends Entity {
+class QuerySource extends Entity {
   @override
   final ClassEntityType? parent;
   final String dartName;
@@ -23,24 +23,24 @@ class SourceQuery extends Entity {
   @override
   String get identifier => 'Query<$dartName>';
 
-  SourceQuery._({
+  QuerySource._({
     required super.resolvers,
     required this.parent,
     required this.dartName,
     required this.graphName,
   });
 
-  static List<SourceQuery> parseClass(
+  static List<QuerySource> parseClass(
     ClassEntityType parent,
     ClassElement element,
   ) {
     return [
-      ...element.getters.map((e) => SourceQuery.parseGetter(parent, e)),
-      ...element.methods.map((e) => SourceQuery.parse(parent, e)),
+      ...element.getters.map((e) => QuerySource.parseGetter(parent, e)),
+      ...element.methods.map((e) => QuerySource.parse(parent, e)),
     ].nonNulls.toList();
   }
 
-  static SourceQuery? parse(ClassEntityType parent, MethodElement element) {
+  static QuerySource? parse(ClassEntityType parent, MethodElement element) {
     final annotation = QueryAnnotation.peek(element);
     if (annotation == null) {
       return null;
@@ -50,7 +50,7 @@ class SourceQuery extends Entity {
     }
     final result = element.returnType;
     if (result is InterfaceType) {
-      final object = SourceQuery._(
+      final object = QuerySource._(
         resolvers: concat(parent.resolvers, annotation.resolvers),
         parent: parent,
         dartName: element.displayName,
@@ -68,7 +68,7 @@ class SourceQuery extends Entity {
     throw Exception('${element.displayName} may return Query<T>');
   }
 
-  static SourceQuery? parseGetter(
+  static QuerySource? parseGetter(
     ClassEntityType parent,
     GetterElement element,
   ) {
@@ -78,7 +78,7 @@ class SourceQuery extends Entity {
     }
     final result = element.returnType as InterfaceType;
 
-    final object = SourceQuery._(
+    final object = QuerySource._(
       resolvers: concat(parent.resolvers, annotation.resolvers),
       parent: parent,
       dartName: element.displayName,
@@ -91,7 +91,7 @@ class SourceQuery extends Entity {
     return object;
   }
 
-  static SourceQuery? parseTopLevelFunction(TopLevelFunctionElement element) {
+  static QuerySource? parseTopLevelFunction(TopLevelFunctionElement element) {
     final annotation = QueryAnnotation.peek(element);
     if (annotation == null) {
       return null;
@@ -99,7 +99,7 @@ class SourceQuery extends Entity {
 
     final result = element.returnType as InterfaceType; // Check Query
 
-    final object = SourceQuery._(
+    final object = QuerySource._(
       resolvers: annotation.resolvers,
       parent: null,
       dartName: element.displayName,
