@@ -1,3 +1,7 @@
+## 0.4.0
+
+Improve validation
+
 ## 0.3.0
 
 Add default value for field
