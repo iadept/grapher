@@ -13,7 +13,7 @@ import 'package:grapher_builder/src/utils/schema.dart';
 
 class Constructor extends Entity {
   final String? dartName;
-  final List<ConstructorParam> params = [];
+  final List<ConstructorField> params = [];
 
   @override
   final ClassEntityType? parent;
@@ -56,14 +56,14 @@ class Constructor extends Entity {
     );
 
     result.params.addAll(
-      element.formalParameters.map((e) => ConstructorParam.parse(result, e)),
+      element.formalParameters.map((e) => ConstructorField.parse(result, e)),
     );
 
     return result;
   }
 }
 
-abstract class _Parameter extends Entity {
+abstract class Parameter extends Entity {
   final String dartName;
   final String? graphName;
   late final Definition def;
@@ -74,7 +74,7 @@ abstract class _Parameter extends Entity {
 
   String get queryParameterValue => '${graphName ?? dartName}: \\\$$dartName';
 
-  _Parameter({
+  Parameter({
     required super.resolvers,
     required this.dartName,
     required this.graphName,
@@ -82,7 +82,7 @@ abstract class _Parameter extends Entity {
   });
 }
 
-class ConstructorParam extends _Parameter {
+class ConstructorField extends Parameter {
   @override
   final Constructor parent;
   final Map<String, DartType>? union;
@@ -91,11 +91,13 @@ class ConstructorParam extends _Parameter {
   final DartObject? defaultValue;
 
   final bool skipInQuery;
+  final String? overrideType;
+  final bool ignoreNullability;
 
   @override
   String get identifier => dartName;
 
-  ConstructorParam._({
+  ConstructorField._({
     required this.parent,
     required super.resolvers,
     required super.dartName,
@@ -106,6 +108,8 @@ class ConstructorParam extends _Parameter {
     required this.input,
     required this.defaultValue,
     required this.skipInQuery,
+    required this.overrideType,
+    required this.ignoreNullability,
   }) : super();
 
   static FieldAnnotation? _getAnnotation(Element element) {
@@ -118,13 +122,13 @@ class ConstructorParam extends _Parameter {
     return null;
   }
 
-  static ConstructorParam parse(
+  static ConstructorField parse(
     Constructor parent,
     FormalParameterElement element,
   ) {
     final annotation = _getAnnotation(element);
 
-    final object = ConstructorParam._(
+    final object = ConstructorField._(
       parent: parent,
       resolvers: parent.resolvers,
       dartName: element.displayName,
@@ -135,20 +139,22 @@ class ConstructorParam extends _Parameter {
       input: annotation?.input,
       defaultValue: annotation?.defaultValue,
       skipInQuery: annotation?.skipInQuery ?? false,
+      overrideType: annotation?.overrideType,
+      ignoreNullability: annotation?.ignoreNullability ?? false,
     );
 
     object.def = Definition.parse(object, element.type);
 
-    if (!object.def.isNullable && annotation?.defaultValue != null) {
-      throw GrapherException(
-        'Non-nullable field ${element.displayName} cannot have defaultValue ',
+    if (object.def.isNullable && annotation?.defaultValue != null) {
+      throw GrapherError(
+        'Non-nullable field cannot have defaultValue ',
         path: object.location,
       );
     }
 
     if (annotation?.defaultValue != null &&
         annotation?.defaultValue?.type?.element != element.type.element) {
-      throw GrapherException(
+      throw GrapherError(
         'defaultValue type mismatch for ${element.displayName}',
         path: object.location,
       );
@@ -184,9 +190,28 @@ class ConstructorParam extends _Parameter {
     final field = "result['${graphName ?? dartName}'] =";
     return '$field ${def.generateToMapField('object.$dartName')}';
   }
+
+  ValidationError? validate(SchemaParam? param, GenericMapped? genericMapped) {
+    final name = graphName ?? dartName;
+
+    if (param == null) {
+      return ValidationError.notFound(name, rawLocation);
+    }
+    final result = def.validate(
+      param.definition,
+      allowOverNullability: true,
+
+      genericMapped: genericMapped,
+    );
+
+    if (result != null) {
+      return result;
+    }
+    return null;
+  }
 }
 
-class MethodParameter extends _Parameter {
+class MethodParameter extends Parameter {
   @override
   final Entity? parent;
 
@@ -229,13 +254,6 @@ class MethodParameter extends _Parameter {
 
     return param;
   }
-
-  void validate(SchemaParameter parameter) {
-    final name = graphName ?? dartName;
-    if (name != parameter.name) {
-      throw ValidationError('Expected ${parameter.name}', path: location);
-    }
-  }
 }
 
 class Generic {
@@ -265,6 +283,6 @@ String? _dartObjectToString(DartObject? object) {
     if (variable?.isEnumValue == true) {
       return '${variable!.type.element!.name}.${variable.name}';
     }
-    throw GrapherException('Unsupported defaultValue type: ${object.type}');
+    throw GrapherError('Unsupported defaultValue type: ${object.type}');
   }
 }

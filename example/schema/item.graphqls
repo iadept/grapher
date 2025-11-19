@@ -1,8 +1,8 @@
 extend type Query {
-    categories(input: SelectCategoryInput!): [Category!]!
-    items(input: SelectItemInput!): [Item!]!
+    categories(input: SelectCategoryInput!): [Category!]
+    items(input: SelectItemInput!): [Item!]
 
-    brands(input: SelectBrandsInput!): [Brand!]!
+    brands(input: SelectBrandsInput!): BrandsResult
 }
 
 extend type Mutation {
@@ -27,6 +27,7 @@ type Item {
     price: Double!
     status: ItemStatus!
     sale: Boolean
+    title: String! @deprecated(reason: "Use name field instead")
 }
 
 enum ItemStatus {
@@ -47,6 +48,8 @@ input UpdateItemInput {
     status: ItemStatus
 }
 
+#
+
 type Brand {
     id: ID!
     name: String!
@@ -60,6 +63,13 @@ input SelectBrandsInput {
 input SelectPopularityInRegionInput {
     countryCode: ID! 
 }
+
+type BrandsResult {
+    totalCount: Int!
+    edges: [Brand!]!
+    pageInfo: PageInfo!
+}
+
 
 # Union example
 
@@ -82,4 +92,13 @@ type RefrigeratorDetails {
 type OvenDetails {
     power: Int!
     hasConvection: Boolean!
+}
+
+#
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String!
+    endCursor: String!
 }

@@ -1,32 +1,33 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:grapher_builder/src/source/entity.dart';
 
-class GrapherException extends Error {
+class GrapherError extends Error {
   final String? path;
   final String message;
 
-  GrapherException(this.message, {this.path});
+  GrapherError(this.message, {this.path});
 
-  factory GrapherException.notFound(String path, String name) =>
-      GrapherException('Type "$name" not found in schema', path: path);
-
-  @override
-  String toString() => [path, message].nonNulls.join(': ');
-}
-
-class ValidationError extends GrapherException {
-  ValidationError(super.message, {required String super.path});
-
-  factory ValidationError.notFound(String path, String name) =>
-      ValidationError('Type "$name" not found in schema', path: path);
+  factory GrapherError.notFound(String path, String name) =>
+      GrapherError('Type "$name" not found in schema', path: path);
 
   @override
   String toString() => [path, message].nonNulls.join(': ');
 }
 
-void throwValidationError(String message, String path) {
-  print([path, message].nonNulls.join(': '));
+void throwValidation(ValidationError? error) {
+  if (error == null) {
+    return;
+  }
+  print(
+    [
+      if (error.isCritical) 'ERROR',
+      error.location,
+      error.message,
+    ].nonNulls.join(': '),
+  );
 }
 
 void onBuildError(Object e, StackTrace s, [Element? element]) {
   print(e);
+  // print(s);
 }

@@ -7,9 +7,8 @@ import 'package:grapher_builder/src/source/entity.dart';
 import 'package:grapher_builder/src/source/type.dart';
 import 'package:grapher_builder/src/utils/annotation_data.dart';
 import 'package:grapher_builder/src/utils/buffer.dart';
-import 'package:grapher_builder/src/utils/exception.dart';
-import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/config.dart';
+import 'package:grapher_builder/src/utils/extension.dart';
 
 class QuerySource extends Entity {
   @override
@@ -21,7 +20,7 @@ class QuerySource extends Entity {
   late final Definition result;
 
   @override
-  String get identifier => 'Query<$dartName>';
+  String get identifier => dartName;
 
   QuerySource._({
     required super.resolvers,
@@ -115,39 +114,42 @@ class QuerySource extends Entity {
     return object;
   }
 
-  void validate() {
+  ValidationError? validate() {
     final schema = Config().schema;
-    if (schema == null) return;
+    if (schema == null) return null;
 
-    final query = schema.queries.firstWhereOrNull((e) => e.name == graphName);
+    final query = schema.queries.byName(graphName);
     if (query == null) {
-      throw GrapherException.notFound(location, graphName);
+      return ValidationError.notFound(graphName, rawLocation);
     }
 
-    // Check required
-    for (final param in query.parameters) {
-      if (params.containsWhere((e) => e.graphName == param.name) &&
-          param.definition.isNonNull) {
-        throw Exception(
-          'Parameter "${param.name}" is required in "$graphName"',
+    // Check required parameters
+    for (final requiredParam in query.parameters.where((e) => e.isRequired)) {
+      if (params.byName(requiredParam.name) == null) {
+        return ValidationError.parameterMissing(
+          requiredParam.name,
+          graphName,
+          rawLocation,
         );
       }
     }
 
-    for (final param in [params.firstOrNull].nonNulls) {
+    for (final param in params) {
       final name = param.graphName ?? param.dartName;
-      final schemaParam = query.parameters.firstWhereOrNull(
-        (e) => e.name == name,
-      );
-
-      if (schemaParam == null) {
-        throw GrapherException(
-          'Parameter "$name" in query "$graphName" is not found',
-          path: location,
-        );
+      final schemaParam = query.parameters.byName(name);
+      if (schemaParam != null) {
+        if (schemaParam.isRequired && param.def.isNullable) {
+          // TODO Check
+          return ValidationError.nullabilityMismatch(
+            param.def.isNullable,
+            schemaParam.definition.isNullable,
+            param.rawLocation,
+          );
+        }
       }
-      param.validate(schemaParam);
     }
+
+    return result.validate(query.returnType, skipNullability: true);
   }
 
   String generate() {

@@ -3,7 +3,9 @@ import 'package:grapher_annotation/grapher_annotation.dart';
 
 part 'item.g.dart';
 
-@ProjectObject(name: 'Item')
+// Simple object with query
+
+@ProjectObject()
 class ItemHeader {
   final ID id;
   final String name;
@@ -15,6 +17,8 @@ class ItemHeader {
       _itemHeaderQuery(input);
 }
 
+// Simple object with query
+
 @ProjectObject(createToMap: true)
 class ItemView extends ItemHeader {
   final DateTime createdAt;
@@ -22,9 +26,10 @@ class ItemView extends ItemHeader {
   final String? description;
   final int count;
   @GrapherField(defaultValue: false)
-  final bool? sale;
-  @GrapherField(defaultValue: ItemStatus.draft)
+  final bool sale;
   final ItemStatus? status;
+
+  final String? title;
 
   const ItemView(
     super.id,
@@ -34,6 +39,7 @@ class ItemView extends ItemHeader {
     this.count,
     this.status,
     this.sale,
+    this.title,
   );
 
   @GrapherQuery(name: 'items')
@@ -62,6 +68,7 @@ class SelectItemInput {
 @GrapherInput(name: 'UpdateItemInput')
 class UpdateItemInput {
   final ID id;
+  @GrapherField(overrideType: 'ItemStatus')
   final String? status;
 
   @GrapherMutation(name: 'updateItem')
@@ -81,7 +88,7 @@ class Brand {
   const Brand(this.id, this.name, this.popular);
 
   @GrapherQuery(name: 'brands')
-  static Query<List<Brand>> query(
+  static Query<PageEntity<Brand>> query(
     SelectBrandsInput input,
     // Additional input for popularity filter
     SelectPopularityInRegionInput popularityInput,
@@ -147,4 +154,22 @@ class OvenDetails {
   final bool hasConvection;
 
   const OvenDetails({required this.power, required this.hasConvection});
+}
+
+@ProjectObject()
+class PageEntity<T> {
+  @GrapherField(name: 'edges')
+  final List<T> items;
+  final PageInfo pageInfo;
+
+  const PageEntity(this.items, this.pageInfo);
+}
+
+@ProjectObject()
+class PageInfo {
+  final bool hasNextPage;
+  final String startCursor;
+  final String endCursor;
+
+  const PageInfo(this.hasNextPage, this.startCursor, this.endCursor);
 }

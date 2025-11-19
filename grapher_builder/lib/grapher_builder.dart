@@ -10,10 +10,10 @@ import 'package:grapher_builder/src/utils/exception.dart';
 import 'package:grapher_builder/src/utils/config.dart';
 import 'package:source_gen/source_gen.dart';
 
-class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
+class _ObjectGenerator extends GeneratorForAnnotation<GrapherObject> {
   final Set<String> generated;
 
-  const _EntityGenerator(this.generated);
+  const _ObjectGenerator(this.generated);
 
   @override
   generateForAnnotatedElement(
@@ -32,7 +32,12 @@ class _EntityGenerator extends GeneratorForAnnotation<GrapherObject> {
 
       generated.addAll(queries.map((e) => e.location));
 
-      source.validate();
+      throwValidation(source.validate());
+
+      for (final query in queries) {
+        throwValidation(query.validate());
+      }
+
       final result = StringBuffer();
       result.writeln(
         [
@@ -66,7 +71,7 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
         InputAnnotation.peek(element as ClassElement)!,
         element,
       );
-      source.validate();
+      throwValidation(source.validate());
 
       final query = QuerySource.parseClass(
         source,
@@ -97,11 +102,8 @@ class _EnumGenerator extends GeneratorForAnnotation<GrapherEnum> {
     BuildStep buildStep,
   ) {
     final source = EnumType.parse(element as EnumElement);
-    try {
-      source.validate();
-    } on ValidationError catch (e, s) {
-      onBuildError(e, s, element);
-    }
+    throwValidation(source.validate());
+
     final result = StringBuffer();
     result.writeln(
       [source.generateFromMap(), source.generateToMap()].nonNulls.join('\n'),
@@ -153,7 +155,7 @@ Builder grapherBuilder(BuilderOptions options) {
   final generated = <String>{};
 
   return SharedPartBuilder([
-    _EntityGenerator(generated),
+    _ObjectGenerator(generated),
     _InputGenerator(generated),
     _EnumGenerator(),
     _MutationGenerator(),

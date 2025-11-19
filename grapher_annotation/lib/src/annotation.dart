@@ -4,6 +4,7 @@ import 'package:meta/meta_meta.dart';
 /// Used to annotate enum
 class GrapherEnum {
   /// The name of the enum in the GraphQL schema.
+  /// By default, it is the same as the Dart enum name.
   final String? name;
 
   /// If true, validate that all enum values are mapped.
@@ -31,6 +32,8 @@ class GrapherEnumValue {
 /// Used to annotate type
 class GrapherObject {
   /// The name of the type in the GraphQL schema.
+  /// Used only for schema validation. If not specified, the name is looked up
+  /// in parent objects, or actions are used to determine the types to validate.
   final String? name;
 
   // Generate toMap method
@@ -46,6 +49,7 @@ class GrapherObject {
 /// Used to annotate input type
 class GrapherInput {
   /// The name of the input type in the GraphQL schema.
+  /// By default, it is the same as the Dart class name.
   final String? name;
 
   /// A list of resolver mixins to handle custom serialization/deserialization.
@@ -58,6 +62,14 @@ class GrapherInput {
 @Target({TargetKind.field})
 /// Used to annotate field of type [GrapherObject] or input [GrapherInput]
 class GrapherField {
+  /// Override type wildcard for any type, disable validation
+  static const overrideTypeAny = '*';
+
+  /// Override type wildcard for enum types
+  ///
+  /// Use this when the field is of type String but in the schema it is an enum
+  static const overrideTypeEnum = '?';
+
   /// The name of the field in the GraphQL schema.
   /// By default, it is the same as the Dart field name.
   final String? name;
@@ -88,6 +100,17 @@ class GrapherField {
   /// codeType use code value
   final bool skipInQuery;
 
+  /// Override the GraphQL type for this field.
+  /// Useful for custom scalars or when the type cannot be inferred.
+  /// For example, if you have a field of type String but in the schema it is a
+  /// enum
+  ///
+  /// Use GrapherField.overrideType* to wildcard types
+  final String? overrideType;
+
+  /// If true, ignore nullability when comparing with schema.
+  final bool ignoreNullability;
+
   const GrapherField({
     this.name,
     this.inputName = 'input',
@@ -95,6 +118,8 @@ class GrapherField {
     this.union,
     this.defaultValue,
     this.skipInQuery = false,
+    this.overrideType,
+    this.ignoreNullability = false,
   });
 }
 

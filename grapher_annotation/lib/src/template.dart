@@ -38,7 +38,7 @@ class Query<T> {
 }
 
 /// GraphQL Mutation data class
-class Mutation<T> {
+class Mutation<T extends Object> {
   /// The name of the mutation
   final String name;
 

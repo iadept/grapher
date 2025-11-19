@@ -4,10 +4,10 @@ Grapher is a helper for generating client-side GraphQL from models written in Da
 
 ## Status
 
-Ready for use in production
+Ready for use in production, but annotations may be change
 
 It is planned in the next versions
-- Enhanced alias support
 - Enhanced validation with schema
 - Support fragment
-- Pass more option in generated queries
+
+I would be glad if you leave feedback.

@@ -5,10 +5,68 @@ import 'package:gql/ast.dart';
 import "package:gql/language.dart" as gql;
 import 'package:grapher_builder/src/utils/exception.dart';
 
-class SchemaQuery {
+sealed class SchemaDef {
+  final Schema _root;
+  final bool isNonNull;
+
+  bool get isNullable => !isNonNull;
+
+  const SchemaDef._({required Schema root, required this.isNonNull})
+    : _root = root;
+
+  factory SchemaDef._parse(Schema root, TypeNode node) {
+    if (node is NamedTypeNode) {
+      return SchemaNameDef._(
+        root: root,
+        name: node.name.value,
+        isNonNull: node.isNonNull,
+      );
+    } else if (node is ListTypeNode) {
+      final itemType = SchemaDef._parse(root, node.type);
+      return SchemaListDef._(
+        root: root,
+        itemType: itemType,
+        isNonNull: node.isNonNull,
+      );
+    } else {
+      throw UnimplementedError();
+    }
+  }
+}
+
+class SchemaNameDef extends SchemaDef {
   final String name;
-  final List<SchemaParameter> parameters;
-  final SchemaDefinition returnType;
+
+  SchemaType? get object => _root.get(name);
+
+  const SchemaNameDef._({
+    required super.root,
+    required this.name,
+    required super.isNonNull,
+  }) : super._();
+
+  @override
+  String toString() => name + (isNonNull ? '!' : '');
+}
+
+class SchemaListDef extends SchemaDef {
+  final SchemaDef itemType;
+
+  const SchemaListDef._({
+    required super.root,
+    required this.itemType,
+    required super.isNonNull,
+  }) : super._();
+
+  @override
+  String toString() => '[$itemType]${isNonNull ? '!' : ''}';
+}
+
+class SchemaQuery with SchemaNameMixin {
+  @override
+  final String name;
+  final List<SchemaParam> parameters;
+  final SchemaDef returnType;
 
   const SchemaQuery({
     required this.name,
@@ -19,30 +77,29 @@ class SchemaQuery {
   factory SchemaQuery.parse(Schema schema, FieldDefinitionNode node) {
     return SchemaQuery(
       name: node.name.value,
-      parameters: node.args
-          .map((e) => SchemaParameter.parse(schema, e))
-          .toList(),
-      returnType: SchemaDefinition._parse(schema, node.type),
+      parameters: node.args.map((e) => SchemaParam.parse(schema, e)).toList(),
+      returnType: SchemaDef._parse(schema, node.type),
     );
   }
 }
 
-class SchemaParameter {
+class SchemaParam with SchemaNameMixin {
+  @override
   final String name;
-  final SchemaDefinition definition;
+  final SchemaDef definition;
   final bool hasDefaultValue;
 
   bool get isRequired => definition.isNonNull && !hasDefaultValue;
 
-  const SchemaParameter({
+  const SchemaParam._({
     required this.name,
     required this.definition,
     required this.hasDefaultValue,
   });
 
-  factory SchemaParameter.parse(Schema schema, InputValueDefinitionNode node) {
-    final type = SchemaDefinition._parse(schema, node.type);
-    return SchemaParameter(
+  factory SchemaParam.parse(Schema schema, InputValueDefinitionNode node) {
+    final type = SchemaDef._parse(schema, node.type);
+    return SchemaParam._(
       name: node.name.value,
       definition: type,
       hasDefaultValue: node.defaultValue != null,
@@ -50,70 +107,14 @@ class SchemaParameter {
   }
 }
 
-sealed class SchemaDefinition {
-  final Schema schema;
-  final bool isNonNull;
-
-  bool get isNullable => !isNonNull;
-
-  const SchemaDefinition({required this.schema, required this.isNonNull});
-
-  factory SchemaDefinition._parse(Schema schema, TypeNode node) {
-    if (node is NamedTypeNode) {
-      return SchemaNameType(
-        schema: schema,
-        name: node.name.value,
-        isNonNull: node.isNonNull,
-      );
-    } else if (node is ListTypeNode) {
-      final itemType = SchemaDefinition._parse(schema, node.type);
-      return SchemaListType(
-        schema: schema,
-        itemType: itemType,
-        isNonNull: node.isNonNull,
-      );
-    } else {
-      throw UnimplementedError();
-    }
-  }
-}
-
-class SchemaNameType extends SchemaDefinition {
-  final String name;
-
-  SchemaBase? get object => schema.get(name);
-
-  const SchemaNameType({
-    required super.schema,
-    required this.name,
-    required super.isNonNull,
-  });
-
-  @override
-  String toString() => name + (isNonNull ? '!' : '');
-}
-
-class SchemaListType extends SchemaDefinition {
-  final SchemaDefinition itemType;
-
-  const SchemaListType({
-    required super.schema,
-    required this.itemType,
-    required super.isNonNull,
-  });
-
-  @override
-  String toString() => '[$itemType]${isNonNull ? '!' : ''}';
-}
-
-abstract class SchemaBase {
+abstract class SchemaType {
   final Schema schema;
   final String name;
 
-  const SchemaBase({required this.schema, required this.name});
+  const SchemaType({required this.schema, required this.name});
 }
 
-class SchemaObject extends SchemaBase {
+class SchemaObject extends SchemaType {
   final List<SchemaField> fields;
 
   const SchemaObject({
@@ -131,8 +132,8 @@ class SchemaObject extends SchemaBase {
   }
 }
 
-class SchemaInput extends SchemaBase {
-  final List<SchemaParameter> fields;
+class SchemaInput extends SchemaType {
+  final List<SchemaParam> fields;
 
   const SchemaInput({
     required super.schema,
@@ -144,12 +145,12 @@ class SchemaInput extends SchemaBase {
     return SchemaInput(
       schema: schema,
       name: node.name.value,
-      fields: node.fields.map((e) => SchemaParameter.parse(schema, e)).toList(),
+      fields: node.fields.map((e) => SchemaParam.parse(schema, e)).toList(),
     );
   }
 }
 
-class SchemaEnum extends SchemaBase {
+class SchemaEnum extends SchemaType {
   final List<String> values;
 
   const SchemaEnum({
@@ -167,20 +168,55 @@ class SchemaEnum extends SchemaBase {
   }
 }
 
-class SchemaField {
-  final String name;
-  final SchemaDefinition definition;
+class SchemaUnion extends SchemaType {
+  final List<SchemaDef> values;
 
-  const SchemaField({required this.name, required this.definition});
+  const SchemaUnion._({
+    required super.schema,
+    required super.name,
+    required this.values,
+  });
 
-  factory SchemaField._field(Schema schema, FieldDefinitionNode node) {
-    final type = SchemaDefinition._parse(schema, node.type);
-    return SchemaField(name: node.name.value, definition: type);
+  factory SchemaUnion._parse(Schema schema, UnionTypeDefinitionNode node) {
+    return SchemaUnion._(
+      schema: schema,
+      name: node.name.value,
+      values: node.types.map((e) => SchemaDef._parse(schema, e)).toList(),
+    );
   }
 }
 
+class SchemaField {
+  final String name;
+  final SchemaDef definition;
+  final bool deprecated;
+
+  const SchemaField._({
+    required this.name,
+    required this.definition,
+    required this.deprecated,
+  });
+
+  factory SchemaField._field(Schema schema, FieldDefinitionNode node) {
+    final type = SchemaDef._parse(schema, node.type);
+    final deprecated = node.directives.firstWhereOrNull(
+      (e) => e.name.value == 'deprecated',
+    );
+
+    return SchemaField._(
+      name: node.name.value,
+      definition: type,
+      deprecated: deprecated != null,
+    );
+  }
+}
+
+mixin SchemaNameMixin {
+  String get name;
+}
+
 class Schema {
-  final objects = <SchemaBase>[];
+  final objects = <SchemaType>[];
   final queries = <SchemaQuery>[];
   final mutations = <FieldDefinitionNode>[];
 
@@ -188,7 +224,7 @@ class Schema {
 
   factory Schema.parse({required String schemaFolder}) {
     if (!Directory(schemaFolder).existsSync()) {
-      throw GrapherException('Schema folder "$schemaFolder" not found');
+      throw GrapherError('Schema folder "$schemaFolder" not found');
     }
 
     final files = Directory(
@@ -198,6 +234,7 @@ class Schema {
     final objectNodes = <ObjectTypeDefinitionNode>[];
     final inputNodes = <InputObjectTypeDefinitionNode>[];
     final enumNodes = <EnumTypeDefinitionNode>[];
+    final unionNodes = <UnionTypeDefinitionNode>[];
 
     final queries = <FieldDefinitionNode>[];
     final mutations = <FieldDefinitionNode>[];
@@ -209,6 +246,7 @@ class Schema {
       objectNodes.addAll(definitions.whereType<ObjectTypeDefinitionNode>());
       enumNodes.addAll(definitions.whereType<EnumTypeDefinitionNode>());
       inputNodes.addAll(definitions.whereType<InputObjectTypeDefinitionNode>());
+      unionNodes.addAll(definitions.whereType<UnionTypeDefinitionNode>());
 
       queries.addAll(
         definitions
@@ -240,6 +278,7 @@ class Schema {
 
     schema.objects.addAll([
       ...objectNodes.map((e) => SchemaObject.parse(schema, e)),
+      ...unionNodes.map((e) => SchemaUnion._parse(schema, e)),
       ...inputNodes.map((e) => SchemaInput.parse(schema, e)),
       ...enumNodes.map((e) => SchemaEnum.parse(schema, e)),
     ]);
@@ -249,6 +288,6 @@ class Schema {
     return schema;
   }
 
-  SchemaBase? get(String name) =>
+  SchemaType? get(String name) =>
       objects.firstWhereOrNull((e) => e.name == name);
 }

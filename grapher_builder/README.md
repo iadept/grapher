@@ -11,10 +11,10 @@ Also see [doc](https://github.com/iadept/grapher/tree/main/grapher_annotation) o
 Add dependencies:
 ```yaml
 dependencies:
-    grapher_annotation: ^0.3.0
+    grapher_annotation: ^0.4.0
 
 dev_dependencies:
-    grapher_builder: ^0.3.0
+    grapher_builder: ^0.4.0
 ```
 
 Create or modify build.yaml (optional for validation with schema)
@@ -25,5 +25,4 @@ targets:
       grapher_builder:
         options:
           schemaFolder: "./schema" # Path with graphQL files
-          allowEnumValueAsStringInput: true # Allow replacing an enum value in input with a string
 ```

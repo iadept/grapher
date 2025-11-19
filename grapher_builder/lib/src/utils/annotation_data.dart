@@ -88,15 +88,19 @@ class FieldAnnotation {
 
   final DartObject? defaultValue;
   final bool skipInQuery;
+  final String? overrideType;
+  final bool ignoreNullability;
 
-  const FieldAnnotation({
+  FieldAnnotation._(
     this.name,
-    required this.inputName,
+    this.inputName,
     this.input,
     this.union,
     this.defaultValue,
-    this.skipInQuery = false,
-  });
+    this.skipInQuery,
+    this.overrideType,
+    this.ignoreNullability,
+  );
 
   factory FieldAnnotation.read(ConstantReader reader) {
     final unionParam = reader.peek('union');
@@ -107,18 +111,20 @@ class FieldAnnotation {
       defaultValue = defaultValueParam.objectValue;
     }
 
-    return FieldAnnotation(
-      name: reader.peek('name')?.stringValue,
-      inputName: reader.read('inputName').stringValue,
-      input: reader.peek('input')?.stringValue,
-      union: unionParam?.mapValue.map((key, value) {
+    return FieldAnnotation._(
+      reader.peek('name')?.stringValue,
+      reader.read('inputName').stringValue,
+      reader.peek('input')?.stringValue,
+      unionParam?.mapValue.map((key, value) {
         return MapEntry<String, DartType>(
           key!.toStringValue()!,
           value!.toTypeValue()!,
         );
       }),
-      defaultValue: defaultValue,
-      skipInQuery: reader.peek('skipInQuery')?.boolValue ?? false,
+      defaultValue,
+      reader.peek('skipInQuery')?.boolValue ?? false,
+      reader.peek('overrideType')?.stringValue,
+      reader.peek('ignoreNullability')?.boolValue ?? false,
     );
   }
 
@@ -179,7 +185,7 @@ class ResolverAnnotation {
         .first;
 
     if (typeArgument == null) {
-      throw GrapherException(
+      throw GrapherError(
         'The class ${type.element.name} used as a resolver '
         'must extend GrapherResolverMixin<T>.',
       );
@@ -223,7 +229,7 @@ List<ResolverAnnotation>? _getResolvers(ConstantReader reader) {
     final annotation = ResolverAnnotation.peek(type.element);
 
     if (annotation == null) {
-      throw GrapherException(
+      throw GrapherError(
         'The class ${type.element.name} used in the resolvers list '
         'must be annotated with @GrapherResolver()',
       );
@@ -236,7 +242,7 @@ List<ResolverAnnotation>? _getResolvers(ConstantReader reader) {
     DartType? typeArgument = mixin?.typeArguments.first;
 
     if (typeArgument == null) {
-      throw GrapherException(
+      throw GrapherError(
         'The class ${type.element.name} used in the resolvers list '
         'must extend GrapherResolverMixin<T>.',
       );
@@ -325,7 +331,7 @@ D? _getAnnotation<A, D>(
     return null;
   }
   if (annotations.length > 1) {
-    throw GrapherException(
+    throw GrapherError(
       "You tried to add multiple @$A() annotations to the "
       "same element ($element), but that's not possible.",
     );

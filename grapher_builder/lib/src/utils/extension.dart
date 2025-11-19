@@ -1,6 +1,21 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:collection/collection.dart';
+import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/utils/annotation_data.dart';
+import 'package:grapher_builder/src/utils/schema.dart';
+
+extension ObjectExtension<T extends Object> on T {
+  K apply<K>(K Function(T value) op) {
+    return op(this);
+  }
+
+  K? as<K>() {
+    if (this is K) {
+      return this as K;
+    }
+    return null;
+  }
+}
 
 extension StringExtension on String {
   String get capitalized {
@@ -26,11 +41,6 @@ extension StringIterableExtension on Iterable<String> {
   }
 }
 
-extension IterableExtension<E> on Iterable<E> {
-  bool containsWhere(bool Function(E element) test) =>
-      firstWhereOrNull(test) != null;
-}
-
 const _annotationPath = 'package:grapher_annotation/grapher_annotation.dart';
 
 extension ElementExtension on Element {
@@ -49,4 +59,16 @@ List<ResolverAnnotation>? concat<T>(
 ) {
   final result = {...?l1, ...?l2};
   return result.isEmpty ? null : result.toList();
+}
+
+extension ListParameterExtension<E extends Parameter> on List<E> {
+  E? byName(String name) {
+    return firstWhereOrNull((e) => name == (e.graphName ?? e.dartName));
+  }
+}
+
+extension ListSchemaNameMixin<T extends SchemaNameMixin> on List<T> {
+  T? byName(String name) {
+    return firstWhereOrNull((e) => e.name == name);
+  }
 }

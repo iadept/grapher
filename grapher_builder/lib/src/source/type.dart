@@ -85,7 +85,7 @@ sealed class BaseType extends Entity {
         return _custom(parent!, value);
       }
     }
-    throw GrapherException(
+    throw GrapherError(
       'Unsupported type:  ${value.getDisplayString()}',
       path: parent?.location,
     );
@@ -122,22 +122,6 @@ class GenericType extends BaseType {
     : super(graphName: null);
 }
 
-class ClassCustomType extends BaseType {
-  final String? queryBody;
-  final String fromMap;
-  final String toMap;
-
-  const ClassCustomType({
-    required super.resolvers,
-    required super.library,
-    required super.dartName,
-    required super.graphName,
-    required this.queryBody,
-    required this.fromMap,
-    required this.toMap,
-  });
-}
-
 class ListType extends BaseType with GenericTypeMixin {
   final Definition item;
 
@@ -166,7 +150,7 @@ BaseType _custom(Entity? parent, InterfaceType element) {
       resolver: resolver,
     );
   }
-  final param = parent?.find<ConstructorParam>();
+  final param = parent?.find<ConstructorField>();
 
   if (param != null) {
     if (param.union == null) {
@@ -174,7 +158,7 @@ BaseType _custom(Entity? parent, InterfaceType element) {
         'Custom type needs "union" or suitable "resolvers" param in: \'${param.location}\'',
       );
     }
-    return ClassObjectType(
+    return ObjectType(
       library: element.element.libraryPath,
       dartName: element.element.displayName,
       parent: parent,
@@ -185,11 +169,11 @@ BaseType _custom(Entity? parent, InterfaceType element) {
   );
 }
 
-class ClassObjectType extends BaseType {
+class ObjectType extends BaseType {
   @override
   final Entity? parent;
 
-  const ClassObjectType({
+  const ObjectType({
     required super.library,
     required super.dartName,
     required this.parent,
@@ -268,79 +252,48 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
     return entity;
   }
 
-  void validate() {
-    final schema = Config().schema;
-    if (schema == null) return;
-    if (graphName == null) return;
-    final name = graphName ?? dartName;
-    final object = schema.get(name);
-    if (object == null) throw GrapherException.notFound(location, name);
-    if (object is! SchemaObject) {
-      throwValidationError('Expect ${object.name} object', location);
-      return;
+  ValidationError? validate({
+    SchemaType? validateObject,
+    GenericMapped? genericMapped,
+  }) {
+    SchemaType? object = validateObject;
+
+    final graphName = this.graphName;
+    if (object == null) {
+      if (graphName != null) {
+        final schema = Config().schema;
+        if (schema == null) return null;
+        object = schema.get(graphName);
+        if (object == null) {
+          return ValidationError.notFound(graphName, rawLocation);
+        }
+      } else {
+        return null;
+      }
     }
 
-    final params = constructor.params;
+    if (object is! SchemaObject) {
+      return ValidationError.typeMismatch(object.name, rawLocation);
+    }
 
-    for (final param in params) {
+    for (final param in constructor.params) {
       final name = param.graphName ?? param.dartName;
       final schemaParam = object.fields.firstWhereOrNull((e) => e.name == name);
       if (schemaParam == null) {
-        throwValidationError(
-          'Field "$name" is not found in ${object.name}',
-          param.location,
-        );
-        return;
+        return ValidationError.notFound(name, param.rawLocation);
       }
-      final def = param.def;
-      final type = def.type;
-      final schemaDef = schemaParam.definition;
-      if (def.isNullable != schemaDef.isNullable) {
-        if (type is EnumType) {
-          if (def.isNullable != type.isFinal) {
-            continue;
-          }
-        }
-        if (schemaDef.isNullable && param.defaultValue != null) {
-          continue;
-        }
-        throwValidationError(
-          'Field "$name" wrong nullability type',
-          param.location,
-        );
+      if (schemaParam.deprecated) {
+        return ValidationError('Field is deprecated', param.rawLocation);
       }
-
-      // validateType(param.def, schemaParam.definition, param.location);
+      final result = param.def.validate(
+        schemaParam.definition,
+        genericMapped: genericMapped,
+      );
+      if (result != null) {
+        return result;
+      }
     }
-  }
-
-  void validateType(Definition def, SchemaDefinition schemaDef, String path) {
-    switch (schemaDef) {
-      case SchemaNameType e:
-        if (def.type.graphName == null) return;
-        final name = def.type.graphName;
-        if (e.name != name) {
-          if (Config().allowEnumStringInput && def.type.dartName == 'String') {
-            final e = Config().schema?.get(schemaDef.name);
-            if (e is SchemaEnum) return;
-          }
-          throwValidationError(
-            'Field type "${def.type.graphName}" does not match schema type "${e.name}"',
-            path,
-          );
-        }
-        break;
-      case SchemaListType e:
-        final type = def.type;
-        if (type is ListType) {
-          validateType(type.item, e.itemType, path);
-        } else {
-          throwValidationError(
-            'Field type "${type.graphName}" is not list type as in schema',
-            path,
-          );
-        }
-    }
+    return null;
   }
 
   @override
@@ -447,47 +400,53 @@ class ClassInputEntityType extends ClassEntityType {
   }
 
   @override
-  void validate() {
-    final schema = Config().schema;
-    if (schema == null) return;
-    final name = graphName ?? dartName;
-    final object = schema.get(name);
-    if (object == null) throw GrapherException.notFound(location, name);
-    if (object is! SchemaInput) {
-      throw ValidationError('Expect ${object.name} object', path: location);
+  ValidationError? validate({
+    SchemaType? validateObject,
+    GenericMapped? genericMapped,
+  }) {
+    SchemaType? object = validateObject;
+    final graphName = this.graphName ?? dartName;
+    if (object == null) {
+      final schema = Config().schema;
+      if (schema == null) return null;
+      object = schema.get(graphName);
+      if (object == null) {
+        return ValidationError.notFound(graphName, rawLocation);
+      }
+    } else {
+      return null;
     }
-    final params = constructor.params;
+
+    if (object is! SchemaInput) {
+      return ValidationError.typeMismatch(object.name, rawLocation);
+    }
+
     // Check required
     final paramNames = constructor.params
         .map((e) => e.graphName ?? e.dartName)
         .toSet();
     for (final field in object.fields.where((e) => e.isRequired)) {
       if (!paramNames.contains(field.name)) {
-        throwValidationError(
-          'Required field "${field.name}" is not mapped',
-          location,
+        return ValidationError.parameterMissing(
+          field.name,
+          object.name,
+          rawLocation,
         );
       }
     }
 
     // Check types
-    for (final param in params) {
-      final name = param.graphName ?? param.dartName;
-      final schemaParam = object.fields.firstWhereOrNull((e) => e.name == name);
-      if (schemaParam == null) {
-        throw ValidationError(
-          'Field "$name" is not found in ${object.name}',
-          path: param.location,
-        );
+    for (final param in constructor.params) {
+      final schemaParam = object.fields.byName(
+        param.graphName ?? param.dartName,
+      );
+
+      final result = param.validate(schemaParam, genericMapped);
+      if (result != null) {
+        return result;
       }
-      if (param.def.isNullable && schemaParam.isRequired) {
-        throw ValidationError(
-          'Field "$name" is required in schema but nullable in model',
-          path: param.location,
-        );
-      }
-      validateType(param.def, schemaParam.definition, param.location);
     }
+    return null;
   }
 }
 
@@ -516,7 +475,7 @@ class EnumType extends BaseType {
     );
 
     if (annotation == null) {
-      throw GrapherException(
+      throw GrapherError(
         'Enum ${element.displayName} must be annotated with @GrapherEnum',
         path: object.location,
       );
@@ -531,35 +490,35 @@ class EnumType extends BaseType {
     return object;
   }
 
-  void validate() {
+  ValidationError? validate() {
     final schema = Config().schema;
-    if (schema == null) return;
-    final object = schema.get(graphName ?? dartName);
+    if (schema == null) return null;
+    final name = graphName ?? dartName;
+    final object = schema.get(name);
     if (object == null) {
-      throw ValidationError.notFound(location, graphName ?? dartName);
+      return ValidationError.notFound(name, rawLocation);
     }
     if (object is SchemaEnum) {
       final names = values.map((e) => e.graphName ?? e.dartName).toSet();
       final schemaNames = object.values.map((e) => e).toSet();
 
       for (final name in names.where((e) => !schemaNames.contains(e))) {
-        throw ValidationError(
-          'Enum value "$name" IS NOT found in scheme',
-          path: location,
+        return ValidationError(
+          'Enum value "$name" IS NOT FOUND',
+          rawLocation,
+          isCritical: true,
         );
       }
 
       if (isStrict) {
         for (final name in schemaNames.where((e) => !names.contains(e))) {
-          throw ValidationError(
-            'Enum value "$name" is not found in model',
-            path: location,
-          );
+          return ValidationError('Enum value "$name" missing', rawLocation);
         }
       }
     } else {
-      throw ValidationError('Expect $dartName enum', path: location);
+      return ValidationError.typeMismatch(object.name, rawLocation);
     }
+    return null;
   }
 
   @override

@@ -16,10 +16,6 @@ Not implemented, but plan:
 
 See [example](https://github.com/iadept/grapher/tree/main/example) project
 
-Annotation have **name** param, by default use dart name of object, which used for schema validation
-
-
-
 ## Types
 
 Define class with unnamed or _ constructor, all fields in this constructor used in code generation
@@ -28,7 +24,7 @@ Below are examples of the Dart model for the GraphQL entity example.
 
 ### Object
 
-Objects validation only occurs if a name is specified.
+Objects validation only occurs if a name is specified or object used in actions
 If name is not specified, it search in parent objects
 
 ```dart

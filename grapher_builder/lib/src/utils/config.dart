@@ -8,11 +8,10 @@ class Config {
   static Config? _instance;
 
   final Schema? schema;
-  final bool allowEnumStringInput;
 
   final Map<String, BaseType> _objects = {};
 
-  Config._({required this.schema, required this.allowEnumStringInput});
+  Config._({required this.schema});
 
   factory Config() => _instance!;
 
@@ -25,11 +24,7 @@ class Config {
       schema = Schema.parse(schemaFolder: schemaFolder);
     }
 
-    final instance = Config._(
-      schema: schema,
-      allowEnumStringInput:
-          options.config['allowEnumValueAsStringInput'] != false,
-    );
+    final instance = Config._(schema: schema);
 
     _instance = instance;
     return instance;
