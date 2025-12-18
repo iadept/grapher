@@ -82,4 +82,9 @@ class ValidationError extends Error {
       ...result,
     ], isCritical: isCritical);
   }
+
+  @override
+  String toString() {
+    return '$location - $message';
+  }
 }

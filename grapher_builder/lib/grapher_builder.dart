@@ -67,10 +67,9 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
     BuildStep buildStep,
   ) {
     try {
-      final source = ClassInputEntityType.parse(
-        InputAnnotation.peek(element as ClassElement)!,
-        element,
-      );
+      final annotation = InputAnnotation.peek(element as ClassElement)!;
+
+      final source = ClassInputEntityType.parse(annotation, element);
       throwValidation(source.validate());
 
       final query = QuerySource.parseClass(
@@ -85,6 +84,7 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
           source.generateToMap(),
           ...query.map((e) => e.generate()),
           ...mutations.map((e) => e.generate()),
+          if (annotation.createFromMap) source.generateFromMap(),
         ].nonNulls.join('\n'),
       );
       return result.toString();

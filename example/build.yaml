@@ -4,3 +4,4 @@ targets:
       grapher_builder:
         options:
           schemaFolder: "./schema" # Specify the schema folder path here
+          throwCriticalError: true

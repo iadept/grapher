@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:grapher_builder/src/source/entity.dart';
+import 'package:grapher_builder/src/utils/config.dart';
 
 class GrapherError extends Error {
   final String? path;
@@ -17,6 +18,9 @@ class GrapherError extends Error {
 void throwValidation(ValidationError? error) {
   if (error == null) {
     return;
+  }
+  if (Config().throwCriticalError && error.isCritical) {
+    throw error;
   }
   print(
     [

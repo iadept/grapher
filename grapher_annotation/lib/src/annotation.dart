@@ -52,10 +52,13 @@ class GrapherInput {
   /// By default, it is the same as the Dart class name.
   final String? name;
 
+  // Generate fromMap method
+  final bool createFromMap;
+
   /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
-  const GrapherInput({this.name, this.resolvers});
+  const GrapherInput({this.name, this.createFromMap = false, this.resolvers});
 }
 
 /// Used to annotate fields in a class.

@@ -138,14 +138,19 @@ class FieldAnnotation {
 class InputAnnotation with BaseAnnotation {
   @override
   final String? name;
+  final bool createFromMap;
   @override
   final List<ResolverAnnotation>? resolvers;
 
-  const InputAnnotation({required this.name, this.resolvers});
-
+  const InputAnnotation({
+    required this.name,
+    this.createFromMap = false,
+    this.resolvers,
+  });
   factory InputAnnotation.read(ConstantReader reader) {
     return InputAnnotation(
       name: reader.peek('name')?.stringValue,
+      createFromMap: reader.peek('createFromMap')?.boolValue ?? false,
       resolvers: _getResolvers(reader),
     );
   }

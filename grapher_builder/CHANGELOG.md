@@ -1,3 +1,8 @@
+## 0.5.0
+
+Add createFromMap for input
+Exit from builder on validation error (throwCriticalError config flag)
+
 ## 0.4.0
 
 Improve validation

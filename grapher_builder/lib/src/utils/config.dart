@@ -8,15 +8,17 @@ class Config {
   static Config? _instance;
 
   final Schema? schema;
+  final bool throwCriticalError;
 
   final Map<String, BaseType> _objects = {};
 
-  Config._({required this.schema});
+  Config._({required this.schema, required this.throwCriticalError});
 
   factory Config() => _instance!;
 
   factory Config.load(BuilderOptions options) {
     final schemaFolder = options.config['schemaFolder'];
+    final throwCriticalError = options.config['throwCriticalError'] ?? true;
 
     Schema? schema;
 
@@ -24,7 +26,10 @@ class Config {
       schema = Schema.parse(schemaFolder: schemaFolder);
     }
 
-    final instance = Config._(schema: schema);
+    final instance = Config._(
+      schema: schema,
+      throwCriticalError: throwCriticalError,
+    );
 
     _instance = instance;
     return instance;
