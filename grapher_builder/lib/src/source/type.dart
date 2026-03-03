@@ -498,9 +498,11 @@ class EnumType extends BaseType {
     if (object == null) {
       return ValidationError.notFound(name, rawLocation);
     }
+
     if (object is SchemaEnum) {
+      final schemaItems = object.values;
       final names = values.map((e) => e.graphName ?? e.dartName).toSet();
-      final schemaNames = object.values.map((e) => e).toSet();
+      final schemaNames = schemaItems.map((e) => e.name).toSet();
 
       for (final name in names.where((e) => !schemaNames.contains(e))) {
         return ValidationError(
@@ -511,7 +513,11 @@ class EnumType extends BaseType {
       }
 
       if (isStrict) {
-        for (final name in schemaNames.where((e) => !names.contains(e))) {
+        for (final name
+            in schemaItems
+                .where((e) => !e.deprecated)
+                .map((e) => e.name)
+                .where((e) => !names.contains(e))) {
           return ValidationError('Enum value "$name" missing', rawLocation);
         }
       }

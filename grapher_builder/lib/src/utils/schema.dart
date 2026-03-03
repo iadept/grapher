@@ -151,7 +151,7 @@ class SchemaInput extends SchemaType {
 }
 
 class SchemaEnum extends SchemaType {
-  final List<String> values;
+  final List<SchemaEnumValue> values;
 
   const SchemaEnum({
     required super.schema,
@@ -163,7 +163,25 @@ class SchemaEnum extends SchemaType {
     return SchemaEnum(
       schema: schema,
       name: node.name.value,
-      values: node.values.map((e) => e.name.value).toList(),
+      values: node.values.map(SchemaEnumValue.parse).toList(),
+    );
+  }
+}
+
+class SchemaEnumValue {
+  final String name;
+  final bool deprecated;
+
+  const SchemaEnumValue({required this.name, required this.deprecated});
+
+  factory SchemaEnumValue.parse(EnumValueDefinitionNode node) {
+    final deprecated = node.directives.firstWhereOrNull(
+      (e) => e.name.value == 'deprecated',
+    );
+
+    return SchemaEnumValue(
+      name: node.name.value,
+      deprecated: deprecated != null,
     );
   }
 }

@@ -1,3 +1,8 @@
+## 0.5.1
+
+Update dep constraint
+Add support deprecated for enum
+
 ## 0.5.0
 
 Add createFromMap for input
