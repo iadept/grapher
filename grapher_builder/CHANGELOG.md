@@ -1,3 +1,7 @@
+## 0.5.3
+
+Update dep constraint
+
 ## 0.5.2
 
 Update dep constraint

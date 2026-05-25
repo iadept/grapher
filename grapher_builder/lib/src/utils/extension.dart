@@ -50,7 +50,7 @@ extension ElementExtension on Element {
 }
 
 extension VariableElementExtension on VariableElement {
-  bool get isEnumValue => isStatic && isConst && !isSynthetic;
+  bool get isEnumValue => isStatic && isConst;
 }
 
 List<ResolverAnnotation>? concat<T>(

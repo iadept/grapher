@@ -1,6 +1,6 @@
 name: grapher_builder
 description: GraphQL code generation based on dart code models. Supports all GraphQL types including queries, mutations, subscriptions, inputs, and enums.
-version: 0.5.2
+version: 0.5.3
 
 resolution: workspace
 
@@ -10,18 +10,15 @@ environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
-  analyzer: ">=8.0.0 <=11.0.0"
+  analyzer: ">=8.0.0 <14.0.0"
   collection: ^1.0.0
   gql: ^1.0.0
   grapher_annotation: ^0.5.0
   source_gen: ^4.0.0
   build: ^4.0.0
-  flutter:
-    sdk: flutter
 
 dev_dependencies:
   # build_runner 2.9.0 has a breaking change(i don't know how to fix it) that affects debugging this package
   build_runner: ^2.11.0
-  flutter_test:
-    sdk: flutter
+
   flutter_lints: ^6.0.0
