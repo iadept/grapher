@@ -148,7 +148,7 @@ class GrapherMutation {
   const GrapherMutation({required this.name, this.resolvers});
 }
 
-@Target({TargetKind.getter})
+@Target({TargetKind.getter, TargetKind.function, TargetKind.method})
 /// Used to annotate subscription
 class GrapherSubscription {
   /// The name of the subscription in the GraphQL schema.

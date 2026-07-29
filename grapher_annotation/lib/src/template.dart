@@ -74,6 +74,9 @@ class Subscription<T> {
   /// The name of the subscription
   final String name;
 
+  /// The variables for the mutation
+  final Map<String, dynamic> variables;
+
   /// The body of the subscription
   final String body;
 
@@ -83,6 +86,7 @@ class Subscription<T> {
   SubscriptionOptions<T> result({FetchPolicy? fetchPolicy, Context? context}) =>
       SubscriptionOptions<T>(
         document: gql(body),
+        variables: variables,
         parserFn: (data) => parserFn(data[name]),
         fetchPolicy: fetchPolicy,
         context: context,
@@ -90,6 +94,7 @@ class Subscription<T> {
 
   const Subscription({
     required this.name,
+    required this.variables,
     required this.body,
     required this.parserFn,
   });

@@ -1,3 +1,7 @@
+## 0.6.0
+
+Add subscription input support
+
 ## 0.5.3
 
 Update dep constraint
