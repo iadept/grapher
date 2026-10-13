@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/source/definition.dart';
 import 'package:grapher_builder/src/source/entity.dart';
+import 'package:grapher_builder/src/source/selection.dart';
 import 'package:grapher_builder/src/source/type.dart';
 import 'package:grapher_builder/src/utils/annotation_data.dart';
 import 'package:grapher_builder/src/utils/buffer.dart';
@@ -165,6 +166,8 @@ class QuerySource extends Entity {
     b.writeln('{Duration? cacheTTL,}');
     b.writeln(') { ');
 
+    final selection = Selection();
+
     // Body variable
     b.writeln("const body = '''");
     b.writeln("query ${graphName.capitalized}(");
@@ -179,7 +182,7 @@ class QuerySource extends Entity {
       );
 
       b.write(")");
-      final query = result.graphBody()?.split('\n');
+      final query = selection.body(result)?.split('\n');
       if (query != null) {
         b.writeln(" {");
         b.block((b) => b.writeln(query));
@@ -190,6 +193,11 @@ class QuerySource extends Entity {
     });
 
     b.write("}");
+    for (final fragment in selection.fragments) {
+      b.writeln();
+      b.writeln();
+      b.write(fragment);
+    }
     b.write("''';");
 
     // Return Query<T>

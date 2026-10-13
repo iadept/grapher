@@ -204,6 +204,27 @@ class SchemaUnion extends SchemaType {
   }
 }
 
+class SchemaInterface extends SchemaType {
+  final List<SchemaField> fields;
+
+  const SchemaInterface._({
+    required super.schema,
+    required super.name,
+    required this.fields,
+  });
+
+  factory SchemaInterface._parse(
+    Schema schema,
+    InterfaceTypeDefinitionNode node,
+  ) {
+    return SchemaInterface._(
+      schema: schema,
+      name: node.name.value,
+      fields: node.fields.map((e) => SchemaField._field(schema, e)).toList(),
+    );
+  }
+}
+
 class SchemaField {
   final String name;
   final SchemaDef definition;
@@ -253,6 +274,7 @@ class Schema {
     final inputNodes = <InputObjectTypeDefinitionNode>[];
     final enumNodes = <EnumTypeDefinitionNode>[];
     final unionNodes = <UnionTypeDefinitionNode>[];
+    final interfaceNodes = <InterfaceTypeDefinitionNode>[];
 
     final queries = <FieldDefinitionNode>[];
     final mutations = <FieldDefinitionNode>[];
@@ -265,6 +287,9 @@ class Schema {
       enumNodes.addAll(definitions.whereType<EnumTypeDefinitionNode>());
       inputNodes.addAll(definitions.whereType<InputObjectTypeDefinitionNode>());
       unionNodes.addAll(definitions.whereType<UnionTypeDefinitionNode>());
+      interfaceNodes.addAll(
+        definitions.whereType<InterfaceTypeDefinitionNode>(),
+      );
 
       queries.addAll(
         definitions
@@ -297,6 +322,7 @@ class Schema {
     schema.objects.addAll([
       ...objectNodes.map((e) => SchemaObject.parse(schema, e)),
       ...unionNodes.map((e) => SchemaUnion._parse(schema, e)),
+      ...interfaceNodes.map((e) => SchemaInterface._parse(schema, e)),
       ...inputNodes.map((e) => SchemaInput.parse(schema, e)),
       ...enumNodes.map((e) => SchemaEnum.parse(schema, e)),
     ]);

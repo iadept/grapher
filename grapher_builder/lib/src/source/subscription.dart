@@ -6,6 +6,7 @@ import 'package:grapher_builder/src/utils/buffer.dart';
 import 'package:grapher_builder/src/source/entity.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/source/definition.dart';
+import 'package:grapher_builder/src/source/selection.dart';
 import 'package:grapher_builder/src/source/type.dart';
 
 class SubscriptionSource extends Entity {
@@ -106,6 +107,8 @@ class SubscriptionSource extends Entity {
 
     b.writeln(' { ');
 
+    final selection = Selection();
+
     // Body variable
     b.writeln("const body = '''");
     b.writeln("subscription ${graphName.capitalized}(");
@@ -122,7 +125,7 @@ class SubscriptionSource extends Entity {
 
       b.write(")");
 
-      final query = result.graphBody()?.split('\n');
+      final query = selection.body(result)?.split('\n');
       if (query != null) {
         b.writeln(" {");
         b.block((b) => b.writeln(query));
@@ -133,6 +136,11 @@ class SubscriptionSource extends Entity {
     });
 
     b.write("}");
+    for (final fragment in selection.fragments) {
+      b.writeln();
+      b.writeln();
+      b.write(fragment);
+    }
     b.writeln("''';");
 
     // Return Query<T>

@@ -5,7 +5,6 @@ import 'package:grapher_annotation/grapher_annotation.dart';
 import 'package:grapher_builder/src/source/class.dart';
 import 'package:grapher_builder/src/source/entity.dart';
 import 'package:grapher_builder/src/source/type.dart';
-import 'package:grapher_builder/src/utils/buffer.dart';
 import 'package:grapher_builder/src/utils/const.dart';
 import 'package:grapher_builder/src/utils/extension.dart';
 import 'package:grapher_builder/src/utils/schema.dart';
@@ -68,63 +67,8 @@ class Definition extends Entity {
     return source;
   }
 
-  String? graphBody([GenericMapped? parentMapped]) {
-    final mapped = _merge(parentMapped);
-    switch (type) {
-      case SimpleType():
-      case EnumType():
-        return null;
-      case ClassWithResolverType e:
-        return e.resolver.queryBody;
-      case ClassEntityType e:
-        final buffer = Buffer();
-        buffer.writeln('__typename');
-        buffer.writeln(
-          e.constructor.params.where((e) => !e.skipInQuery).map((e) {
-            final buffer = Buffer();
-
-            buffer.write(e.graphName ?? e.dartName);
-            if (e.input != null) {
-              buffer.write('(${e.inputName}: \\\$${e.input!})');
-            }
-            if (e.union != null) {
-              buffer.writeln(' {');
-              buffer.block((buffer) {
-                buffer.writeln('__typename');
-                e.union!.forEach((key, value) {
-                  buffer.writeln('... on $key {');
-                  buffer.block((b) {
-                    final def = Definition.parse(this, value);
-                    final body = def.graphBody(mapped);
-                    if (body != null) {
-                      b.writeln(body.split('\n'));
-                    }
-                  });
-                  buffer.writeln('}');
-                });
-              });
-              buffer.writeln('}');
-            } else {
-              final body = e.def.graphBody(mapped);
-              if (body != null) {
-                buffer.writeln(' {');
-                buffer.block((buffer) => buffer.writeln(body.split('\n')));
-                buffer.writeln('}');
-              }
-            }
-            return buffer.toString();
-          }),
-        );
-        return buffer.toString();
-
-      case ListType e:
-        return e.item.graphBody(mapped);
-      case GenericType e:
-        return mapped?[e.dartName]?.graphBody(mapped);
-      case ObjectType():
-        throw UnimplementedError();
-    }
-  }
+  /// Generic arguments of this type resolved against [source].
+  GenericMapped? mergeGenerics(GenericMapped? source) => _merge(source);
 
   Definition({
     required this.parent,

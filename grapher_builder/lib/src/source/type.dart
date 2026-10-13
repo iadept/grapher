@@ -204,6 +204,9 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
   late final Constructor constructor;
   final List<Generic> generic;
 
+  /// Selected through a named fragment, see [GrapherObject.fragment].
+  final bool isFragment;
+
   @override
   String get dartNameFull {
     if (generic.isEmpty) return dartName;
@@ -216,6 +219,7 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
     required super.dartName,
     required super.graphName,
     required this.generic,
+    this.isFragment = false,
   });
 
   factory ClassEntityType.parse(
@@ -243,7 +247,15 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
       dartName: element.displayName,
       graphName: graphName,
       generic: element.typeParameters.map(Generic.parse).toList(),
+      isFragment: annotation is ObjectAnnotation && annotation.fragment,
     );
+
+    if (entity.isFragment && entity.generic.isNotEmpty) {
+      throw GrapherError(
+        'Fragment is not supported for generic types',
+        path: entity.location,
+      );
+    }
 
     entity.constructor = Constructor.parseDefaultConstructor(entity, element);
 
@@ -272,13 +284,18 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
       }
     }
 
-    if (object is! SchemaObject) {
+    final fields = switch (object) {
+      SchemaObject e => e.fields,
+      SchemaInterface e => e.fields,
+      _ => null,
+    };
+    if (fields == null) {
       return ValidationError.typeMismatch(object.name, rawLocation);
     }
 
     for (final param in constructor.params) {
       final name = param.graphName ?? param.dartName;
-      final schemaParam = object.fields.firstWhereOrNull((e) => e.name == name);
+      final schemaParam = fields.firstWhereOrNull((e) => e.name == name);
       if (schemaParam == null) {
         return ValidationError.notFound(name, param.rawLocation);
       }
@@ -345,7 +362,10 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
     // Union parsers
     constructor.params.where((e) => e.union != null).forEach((param) {
       final name = [fromUnionPrefix, param.dartName].uncapitalized;
-      result.writeln('${param.def.dartNameFullNullable} $name(dynamic json) {');
+      // A list field is parsed item by item, see ConstructorField.
+      final paramType = param.def.type;
+      final def = paramType is ListType ? paramType.item : param.def;
+      result.writeln('${def.dartNameFullNullable} $name(dynamic json) {');
       result.writeln("\tfinal type = json['__typename'];");
       for (final item in param.union!.entries) {
         final t = Definition.parse(this, item.value);
@@ -353,7 +373,13 @@ class ClassEntityType extends BaseType with GenericTypeMixin {
         result.writeln('\t\treturn ${t.generateFromMapField('json')};');
         result.writeln('\t}');
       }
-      result.writeln('\treturn null;');
+      // An object item type (the interface) parses members of unknown types,
+      // otherwise they are skipped.
+      if (def.type is ClassEntityType) {
+        result.writeln('\treturn ${def.generateFromMapField('json')};');
+      } else {
+        result.writeln('\treturn null;');
+      }
       result.writeln('}');
     });
 

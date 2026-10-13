@@ -5,11 +5,11 @@ Grapher is a helper for generating client-side GraphQL from models written in Da
 Support all base features:
 - Type, Input, Enum
 - Query, Mutation, Subscription
-- Union
+- Union (including list fields)
 - Subquery (query on field)
+- Fragments and recursive types
 
 Not implemented, but plan:
-- Fragments generation (for reduce query complexity)
 - Multiple queries in one
 
 # Usage
@@ -92,6 +92,41 @@ class Item {
   const Item(
     this.id,
   );
+}
+```
+
+### Fragments and recursive types
+
+`@GrapherObject(fragment: true)` selects the type through a named fragment
+`<Type>Fields`. For a union field, `@GrapherField(fragment: 'Type')` does the
+same with a fragment on the union or interface `Type`.
+
+A field that leads back to a type it is selected from is recursive and needs
+`maxDepth`: how many times it nests. Fragments cannot contain such fields
+(fragment spreads must not form cycles), so they are selected next to the spread.
+
+```dart
+const _widgets = {'Paragraph': Paragraph, 'Block': Block};
+
+@GrapherObject(name: 'Block')
+class Block extends Widget {
+  @GrapherField(union: _widgets, fragment: 'Widget', maxDepth: 1)
+  final List<Widget> children;
+
+  const Block(this.children);
+}
+```
+
+```graphql
+widgets {
+  ...WidgetFields
+  ... on Block { children { ...WidgetFields } }
+}
+
+fragment WidgetFields on Widget {
+  __typename
+  ... on Paragraph { text }
+  ... on Block { title }
 }
 ```
 

@@ -1,3 +1,9 @@
+## 0.7.0
+
+Add union support for list fields (items of unknown types are skipped)
+Add fragments: `GrapherObject.fragment`, `GrapherField.fragment`
+Add recursive fields with `GrapherField.maxDepth`
+
 ## 0.6.0
 
 Add subscription input support

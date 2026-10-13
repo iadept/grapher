@@ -42,7 +42,17 @@ class GrapherObject {
   /// A list of resolver mixins to handle custom serialization/deserialization.
   final List<GrapherResolverMixin>? resolvers;
 
-  const GrapherObject({this.name, this.createToMap = false, this.resolvers});
+  /// If true, the selection of this type is generated as a named fragment
+  /// `fragment <Type>Fields on <Type>` and spread wherever the type is used.
+  /// The type is [name], or the Dart class name. Not supported for generics.
+  final bool fragment;
+
+  const GrapherObject({
+    this.name,
+    this.createToMap = false,
+    this.resolvers,
+    this.fragment = false,
+  });
 }
 
 @Target({TargetKind.classType})
@@ -114,6 +124,19 @@ class GrapherField {
   /// If true, ignore nullability when comparing with schema.
   final bool ignoreNullability;
 
+  /// GraphQL type (union or interface) of a [union] field. When set, the
+  /// union selection is generated as a named fragment
+  /// `fragment <fragment>Fields on <fragment>` and spread in queries.
+  final String? fragment;
+
+  /// How many times a recursive field (a field that leads back to a type it
+  /// is selected from) nests in a query; required for such fields. Deeper
+  /// levels are not selected.
+  ///
+  /// Example: `children` of a tree node with `maxDepth: 1` selects the
+  /// children of the root nodes, but not their own children.
+  final int? maxDepth;
+
   const GrapherField({
     this.name,
     this.inputName = 'input',
@@ -123,6 +146,8 @@ class GrapherField {
     this.skipInQuery = false,
     this.overrideType,
     this.ignoreNullability = false,
+    this.fragment,
+    this.maxDepth,
   });
 }
 

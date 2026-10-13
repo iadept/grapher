@@ -93,6 +93,8 @@ class ConstructorField extends Parameter {
   final bool skipInQuery;
   final String? overrideType;
   final bool ignoreNullability;
+  final String? fragment;
+  final int? maxDepth;
 
   @override
   String get identifier => dartName;
@@ -110,6 +112,8 @@ class ConstructorField extends Parameter {
     required this.skipInQuery,
     required this.overrideType,
     required this.ignoreNullability,
+    required this.fragment,
+    required this.maxDepth,
   }) : super();
 
   static FieldAnnotation? _getAnnotation(Element element) {
@@ -141,6 +145,8 @@ class ConstructorField extends Parameter {
       skipInQuery: annotation?.skipInQuery ?? false,
       overrideType: annotation?.overrideType,
       ignoreNullability: annotation?.ignoreNullability ?? false,
+      fragment: annotation?.fragment,
+      maxDepth: annotation?.maxDepth,
     );
 
     object.def = Definition.parse(object, element.type);
@@ -168,10 +174,15 @@ class ConstructorField extends Parameter {
     String value;
 
     if (union != null) {
-      value = '${[fromUnionPrefix, dartName].uncapitalized}($name)';
+      final parseFunc = [fromUnionPrefix, dartName].uncapitalized;
+      final isList = def.type is ListType;
+      // Items of unknown types are skipped unless the item type is an object.
+      value = isList
+          ? '($name as List).map($parseFunc).nonNulls.toList()'
+          : '$parseFunc($name)';
       if (def.isNullable) {
         value = '$name == null ? null : $value';
-      } else {
+      } else if (!isList) {
         value = '$value!';
       }
     } else {

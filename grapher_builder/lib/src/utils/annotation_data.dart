@@ -58,11 +58,13 @@ class ObjectAnnotation with BaseAnnotation {
   final bool createToMap;
   @override
   final List<ResolverAnnotation>? resolvers;
+  final bool fragment;
 
   const ObjectAnnotation._({
     required this.name,
     required this.createToMap,
     this.resolvers,
+    required this.fragment,
   });
 
   factory ObjectAnnotation.read(ConstantReader reader) {
@@ -70,6 +72,7 @@ class ObjectAnnotation with BaseAnnotation {
       name: reader.peek('name')?.stringValue,
       createToMap: reader.peek('createToMap')?.boolValue ?? false,
       resolvers: _getResolvers(reader),
+      fragment: reader.peek('fragment')?.boolValue ?? false,
     );
   }
 
@@ -90,6 +93,8 @@ class FieldAnnotation {
   final bool skipInQuery;
   final String? overrideType;
   final bool ignoreNullability;
+  final String? fragment;
+  final int? maxDepth;
 
   FieldAnnotation._(
     this.name,
@@ -100,6 +105,8 @@ class FieldAnnotation {
     this.skipInQuery,
     this.overrideType,
     this.ignoreNullability,
+    this.fragment,
+    this.maxDepth,
   );
 
   factory FieldAnnotation.read(ConstantReader reader) {
@@ -125,6 +132,8 @@ class FieldAnnotation {
       reader.peek('skipInQuery')?.boolValue ?? false,
       reader.peek('overrideType')?.stringValue,
       reader.peek('ignoreNullability')?.boolValue ?? false,
+      reader.peek('fragment')?.stringValue,
+      reader.peek('maxDepth')?.intValue,
     );
   }
 

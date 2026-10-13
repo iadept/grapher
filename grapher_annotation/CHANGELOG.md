@@ -1,3 +1,7 @@
+## 0.7.0
+
+Add `GrapherObject.fragment`, `GrapherField.fragment` and `GrapherField.maxDepth`
+
 ## 0.6.0
 
 Add subscription input support
