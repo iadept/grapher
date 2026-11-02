@@ -78,6 +78,10 @@ class _InputGenerator extends GeneratorForAnnotation<GrapherInput> {
       ).where((e) => !generated.contains(e.location));
       final mutations = MutationSource.parseClass(source, element);
 
+      for (final e in query) {
+        throwValidation(e.validate());
+      }
+
       final result = StringBuffer();
       result.writeln(
         [

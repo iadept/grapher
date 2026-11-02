@@ -1,3 +1,7 @@
+## 0.7.1
+
+Fix validation
+
 ## 0.7.0
 
 Add union support for list fields (items of unknown types are skipped)
