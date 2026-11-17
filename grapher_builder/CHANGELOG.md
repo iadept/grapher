@@ -1,3 +1,8 @@
+## 0.7.2
+
+Support analyzer 14.x and build 5.x (Flutter 3.50 / Dart 3.14)
+Fix `GrapherField.defaultValue` for non-nullable fields: missing key now falls back to the default instead of throwing a cast error
+
 ## 0.7.1
 
 Fix validation

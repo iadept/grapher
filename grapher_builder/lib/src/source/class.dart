@@ -151,13 +151,6 @@ class ConstructorField extends Parameter {
 
     object.def = Definition.parse(object, element.type);
 
-    if (object.def.isNullable && annotation?.defaultValue != null) {
-      throw GrapherError(
-        'Non-nullable field cannot have defaultValue ',
-        path: object.location,
-      );
-    }
-
     if (annotation?.defaultValue != null &&
         annotation?.defaultValue?.type?.element != element.type.element) {
       throw GrapherError(

@@ -108,6 +108,8 @@ class Definition extends Entity {
       if (defaultValue != null) {
         return '($expr) ?? $defaultValue';
       }
+    } else if (defaultValue != null) {
+      return '$field == null ? $defaultValue : $expr';
     }
     return expr;
   }
